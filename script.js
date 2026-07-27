@@ -16,6 +16,7 @@
   var form = document.getElementById("predict-form");
   var input5kMin = document.getElementById("time5k-m");
   var input5kSec = document.getElementById("time5k-s");
+  var input10kHour = document.getElementById("time10k-h");
   var input10kMin = document.getElementById("time10k-m");
   var input10kSec = document.getElementById("time10k-s");
   var formError = document.getElementById("form-error");
@@ -38,24 +39,26 @@
 
   // ---------- time parsing / formatting ----------
 
-  function readMinSecInputs(minInput, secInput) {
+  function readTimeInputs(hourInput, minInput, secInput) {
+    var rawH = hourInput ? hourInput.value.trim() : "";
     var rawM = minInput.value.trim();
     var rawS = secInput.value.trim();
 
-    if (rawM === "" && rawS === "") {
+    if (rawH === "" && rawM === "" && rawS === "") {
       return { seconds: null, touched: false };
     }
-    if (!/^\d*$/.test(rawM) || !/^\d*$/.test(rawS)) {
+    if (!/^\d*$/.test(rawH) || !/^\d*$/.test(rawM) || !/^\d*$/.test(rawS)) {
       return { seconds: null, touched: true };
     }
 
+    var hh = rawH === "" ? 0 : parseInt(rawH, 10);
     var mm = rawM === "" ? 0 : parseInt(rawM, 10);
     var ss = rawS === "" ? 0 : parseInt(rawS, 10);
-    if (ss >= 60) {
+    if (mm >= 60 || ss >= 60) {
       return { seconds: null, touched: true };
     }
 
-    var total = mm * 60 + ss;
+    var total = hh * 3600 + mm * 60 + ss;
     if (total <= 0) {
       return { seconds: null, touched: true };
     }
@@ -69,7 +72,7 @@
     }
   }
 
-  [input5kMin, input5kSec, input10kMin, input10kSec].forEach(function (el) {
+  [input5kMin, input5kSec, input10kHour, input10kMin, input10kSec].forEach(function (el) {
     el.addEventListener("input", sanitizeDigitsOnly);
   });
 
@@ -112,17 +115,17 @@
   function calculate() {
     formError.hidden = true;
 
-    var r5 = readMinSecInputs(input5kMin, input5kSec);
-    var r10 = readMinSecInputs(input10kMin, input10kSec);
+    var r5 = readTimeInputs(null, input5kMin, input5kSec);
+    var r10 = readTimeInputs(input10kHour, input10kMin, input10kSec);
     var t5 = r5.seconds;
     var t10 = r10.seconds;
 
     if (r5.touched && t5 === null) {
-      showError("5km 기록을 확인해주세요. 초는 0~59 사이여야 합니다.");
+      showError("5km 기록을 확인해주세요. 분·초는 0~59 사이여야 합니다.");
       return;
     }
     if (r10.touched && t10 === null) {
-      showError("10km 기록을 확인해주세요. 초는 0~59 사이여야 합니다.");
+      showError("10km 기록을 확인해주세요. 분·초는 0~59 사이여야 합니다.");
       return;
     }
     if (t5 === null && t10 === null) {

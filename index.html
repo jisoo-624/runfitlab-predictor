@@ -33,13 +33,15 @@
             <span class="field-hint">분 : 초</span>
           </div>
           <div class="field">
-            <label for="time10k-m">10km 기록</label>
+            <label for="time10k-h">10km 기록</label>
             <div class="time-input-group">
-              <input type="text" id="time10k-m" name="time10k-m" placeholder="49" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off" aria-label="10km 기록 분">
+              <input type="text" id="time10k-h" name="time10k-h" placeholder="0" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" aria-label="10km 기록 시">
+              <span class="time-sep">:</span>
+              <input type="text" id="time10k-m" name="time10k-m" placeholder="49" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" aria-label="10km 기록 분">
               <span class="time-sep">:</span>
               <input type="text" id="time10k-s" name="time10k-s" placeholder="0" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" aria-label="10km 기록 초">
             </div>
-            <span class="field-hint">분 : 초</span>
+            <span class="field-hint">시 : 분 : 초</span>
           </div>
         </div>
 
