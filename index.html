@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>RunFitLab 예상 기록 계산기</title>
+<meta name="description" content="5km/10km 기록으로 하프·풀마라톤 예상 기록과 1km 페이스 밴드를 계산합니다 (Riegel Formula 기반)">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
+
+  <header class="header">
+    <h1>RunFit<span>Lab</span></h1>
+    <p class="subtitle">5km · 10km 기록으로 하프 &amp; 풀코스 예상 기록을 계산해요</p>
+  </header>
+
+  <main class="container">
+
+    <section class="card form-card">
+      <h2 class="card-title">기록 입력</h2>
+      <p class="hint">5km, 10km 중 하나 이상 입력하세요. 둘 다 입력하면 두 예측의 평균으로 계산합니다.</p>
+
+      <form id="predict-form" novalidate>
+        <div class="field-row">
+          <div class="field">
+            <label for="time5k">5km 기록</label>
+            <input type="text" id="time5k" name="time5k" placeholder="예: 23:30" inputmode="numeric" autocomplete="off">
+            <span class="field-hint">mm:ss</span>
+          </div>
+          <div class="field">
+            <label for="time10k">10km 기록</label>
+            <input type="text" id="time10k" name="time10k" placeholder="예: 49:00" inputmode="numeric" autocomplete="off">
+            <span class="field-hint">mm:ss 또는 h:mm:ss</span>
+          </div>
+        </div>
+
+        <p id="form-error" class="error-msg" role="alert" hidden></p>
+
+        <div class="button-row">
+          <button type="submit" class="btn btn-primary">예상 기록 계산하기</button>
+          <button type="button" id="reset-btn" class="btn btn-ghost">초기화</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card result-card" id="result-section" hidden>
+      <h2 class="card-title">예상 기록</h2>
+      <p class="basis-text" id="basis-text"></p>
+
+      <div class="predict-grid">
+        <div class="predict-box predict-half">
+          <span class="predict-label">하프마라톤 (21.0975km)</span>
+          <span class="predict-time" id="half-time">--:--:--</span>
+          <span class="predict-pace" id="half-pace">평균 페이스 --:--/km</span>
+        </div>
+        <div class="predict-box predict-full">
+          <span class="predict-label">풀마라톤 (42.195km)</span>
+          <span class="predict-time" id="full-time">--:--:--</span>
+          <span class="predict-pace" id="full-pace">평균 페이스 --:--/km</span>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button type="button" class="tab-btn active" data-tab="half">하프 페이스 밴드</button>
+        <button type="button" class="tab-btn" data-tab="full">풀코스 페이스 밴드</button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="pace-table" id="half-table">
+          <thead>
+            <tr><th>구간</th><th>1km 페이스</th><th>완주 예상 시간</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <table class="pace-table" id="full-table" hidden>
+          <thead>
+            <tr><th>구간</th><th>1km 페이스</th><th>완주 예상 시간</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="button-row">
+        <button type="button" id="save-image-btn" class="btn btn-primary">결과 이미지 저장</button>
+      </div>
+
+      <p class="disclaimer">
+        * Riegel Formula(지수 1.06) 기반 추정치이며 실제 레이스 결과는 컨디션, 코스, 날씨 등에 따라 달라질 수 있습니다.<br>
+        * 입력한 기록과 계산 결과는 저장되지 않으며, 이 브라우저 안에서만 계산됩니다.
+      </p>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>RunFitLab &middot; 정적 웹 계산기 &middot; 개인정보를 저장하지 않습니다</p>
+  </footer>
+
+</div>
+
+<canvas id="export-canvas" hidden></canvas>
+<script src="script.js"></script>
+</body>
+</html>
