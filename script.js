@@ -21,7 +21,8 @@
   var formError = document.getElementById("form-error");
   var resetBtn = document.getElementById("reset-btn");
   var resultSection = document.getElementById("result-section");
-  var basisText = document.getElementById("basis-text");
+  var basisGrid = document.getElementById("basis-grid");
+  var basisNote = document.getElementById("basis-note");
   var halfTimeEl = document.getElementById("half-time");
   var halfPaceEl = document.getElementById("half-pace");
   var fullTimeEl = document.getElementById("full-time");
@@ -131,28 +132,24 @@
 
     var halfPredictions = [];
     var fullPredictions = [];
-    var basisParts = [];
+    var basisList = [];
 
     if (t5 !== null) {
       halfPredictions.push(riegelPredict(t5, DISTANCE.five, DISTANCE.half));
       fullPredictions.push(riegelPredict(t5, DISTANCE.five, DISTANCE.full));
-      basisParts.push("5km " + formatSecondsToTime(t5));
+      basisList.push({ label: "5km 기준", seconds: t5, distanceKm: DISTANCE.five });
     }
     if (t10 !== null) {
       halfPredictions.push(riegelPredict(t10, DISTANCE.ten, DISTANCE.half));
       fullPredictions.push(riegelPredict(t10, DISTANCE.ten, DISTANCE.full));
-      basisParts.push("10km " + formatSecondsToTime(t10));
+      basisList.push({ label: "10km 기준", seconds: t10, distanceKm: DISTANCE.ten });
     }
 
     var finalHalf = average(halfPredictions);
     var finalFull = average(fullPredictions);
 
-    var basisLabel = "기준 기록: " + basisParts.join(" · ") +
-      (basisParts.length === 2 ? " (두 예측의 평균)" : "");
-
     lastResult = {
-      basisLabel: basisLabel,
-      basisParts: basisParts,
+      basisList: basisList,
       half: finalHalf,
       full: finalFull
     };
@@ -166,8 +163,38 @@
     resultSection.hidden = true;
   }
 
+  function renderBasisGrid(container, basisList) {
+    container.innerHTML = "";
+    container.classList.toggle("single", basisList.length === 1);
+    basisList.forEach(function (item) {
+      var box = document.createElement("div");
+      box.className = "predict-box basis-box";
+
+      var label = document.createElement("span");
+      label.className = "predict-label";
+      label.textContent = item.label;
+
+      var time = document.createElement("span");
+      time.className = "predict-time";
+      time.textContent = formatSecondsToTime(item.seconds);
+
+      var pace = document.createElement("span");
+      pace.className = "predict-pace";
+      pace.textContent = "평균 페이스 " + formatPace(item.seconds / item.distanceKm) + "/km";
+
+      box.appendChild(label);
+      box.appendChild(time);
+      box.appendChild(pace);
+      container.appendChild(box);
+    });
+  }
+
   function renderResult(result) {
-    basisText.textContent = result.basisLabel;
+    renderBasisGrid(basisGrid, result.basisList);
+    basisNote.hidden = result.basisList.length < 2;
+    if (result.basisList.length >= 2) {
+      basisNote.textContent = "* 하프·풀코스 예상 기록은 5km, 10km 기록으로 각각 예측한 값의 평균입니다.";
+    }
 
     halfTimeEl.textContent = formatSecondsToTime(result.half);
     halfPaceEl.textContent = "평균 페이스 " + formatPace(result.half / DISTANCE.half) + "/km";
@@ -256,7 +283,7 @@
   }
 
   function buildResultImage(result) {
-    var W = 1080, H = 1150;
+    var W = 1080, H = 1330;
     var canvas = document.getElementById("export-canvas");
     canvas.width = W;
     canvas.height = H;
@@ -292,20 +319,27 @@
     y += 40;
     ctx.font = "600 22px -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
     ctx.fillStyle = "#6b7280";
-    ctx.fillText("Riegel Formula (지수 1.06) 기반 예측", cx, y);
+    ctx.fillText("Riegel Formula 기반 예측", cx, y);
 
-    y += 30;
-    ctx.font = "500 20px -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
-    ctx.fillStyle = "#9aa1b0";
-    ctx.fillText("기준 기록: " + result.basisParts.join("  ·  "), cx, y);
-
-    // predict boxes
-    y += 60;
+    // basis record boxes
+    y += 54;
     var boxW = (W - pad * 2 - 100) / 2;
-    var boxH = 260;
-    var boxY = y;
     var leftX = pad + 50;
     var rightX = leftX + boxW + 40;
+    var basisBoxH = 150;
+    var basisY = y;
+
+    if (result.basisList.length === 1) {
+      drawBasisBox(ctx, leftX, basisY, boxW * 2 + 40, basisBoxH, "#f1f3f9", "#1a1d29", result.basisList[0]);
+    } else {
+      drawBasisBox(ctx, leftX, basisY, boxW, basisBoxH, "#f1f3f9", "#1a1d29", result.basisList[0]);
+      drawBasisBox(ctx, rightX, basisY, boxW, basisBoxH, "#f1f3f9", "#1a1d29", result.basisList[1]);
+    }
+
+    // predict boxes
+    y = basisY + basisBoxH + 34;
+    var boxH = 260;
+    var boxY = y;
 
     drawPredictBox(ctx, leftX, boxY, boxW, boxH, "#eff4ff", "#2563eb",
       "하프마라톤", "21.0975km", formatSecondsToTime(result.half),
@@ -368,9 +402,33 @@
     ctx.fillText("* 실제 레이스 결과는 컨디션, 코스, 날씨에 따라 달라질 수 있습니다.", cx, H - pad - 34);
     ctx.font = "700 18px -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
     ctx.fillStyle = "#2563eb";
-    ctx.fillText("RunFitLab", cx, H - pad - 6);
+    ctx.fillText("instagram.com/runfit_lab", cx, H - pad - 6);
 
     return canvas;
+  }
+
+  function drawBasisBox(ctx, x, y, w, h, bg, accent, item) {
+    drawRoundedRect(ctx, x, y, w, h, 20);
+    ctx.fillStyle = bg;
+    ctx.fill();
+
+    ctx.textAlign = "left";
+    var px = x + 28;
+    var py = y + 44;
+
+    ctx.font = "700 20px -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+    ctx.fillStyle = "#6b7280";
+    ctx.fillText(item.label, px, py);
+
+    py += 48;
+    ctx.font = "800 38px -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+    ctx.fillStyle = accent;
+    ctx.fillText(formatSecondsToTime(item.seconds), px, py);
+
+    py += 30;
+    ctx.font = "500 16px -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+    ctx.fillStyle = "#6b7280";
+    ctx.fillText("평균 페이스 " + formatPace(item.seconds / item.distanceKm) + "/km", px, py);
   }
 
   function drawPredictBox(ctx, x, y, w, h, bg, accent, label, distLabel, timeText, paceText) {

@@ -48,13 +48,15 @@ body {
 
 .header h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 21px;
+  line-height: 1.35;
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   color: var(--color-text);
 }
 
 .header h1 span {
+  display: inline-block;
   color: var(--color-primary);
 }
 
@@ -215,9 +217,25 @@ body {
   background: #e6e9f2;
 }
 
-.basis-text {
+.basis-grid {
+  margin-bottom: 12px;
+}
+
+.basis-grid.single {
+  grid-template-columns: 1fr;
+}
+
+.basis-box {
+  background: #f1f3f9;
+}
+
+.basis-box .predict-time {
+  color: var(--color-text);
+}
+
+.basis-note {
   margin: 0 0 18px;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--color-text-muted);
 }
 
@@ -360,6 +378,6 @@ body {
   }
 
   .header h1 {
-    font-size: 32px;
+    font-size: 26px;
   }
 }
