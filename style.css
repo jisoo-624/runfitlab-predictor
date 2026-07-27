@@ -133,6 +133,37 @@ body {
   color: var(--color-text-muted);
 }
 
+.time-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.time-input-group input {
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-size: 16px;
+  text-align: center;
+  color: var(--color-text);
+  background: #fafbfd;
+  outline: none;
+  min-width: 0;
+  flex: 1;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.time-input-group input:focus {
+  border-color: var(--color-primary);
+  background: #ffffff;
+}
+
+.time-sep {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
 .error-msg {
   margin: 12px 0 0;
   padding: 10px 12px;

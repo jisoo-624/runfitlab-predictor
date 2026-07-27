@@ -24,14 +24,22 @@
       <form id="predict-form" novalidate>
         <div class="field-row">
           <div class="field">
-            <label for="time5k">5km 기록</label>
-            <input type="text" id="time5k" name="time5k" placeholder="예: 23:30" inputmode="numeric" autocomplete="off">
-            <span class="field-hint">mm:ss</span>
+            <label for="time5k-m">5km 기록</label>
+            <div class="time-input-group">
+              <input type="text" id="time5k-m" name="time5k-m" placeholder="23" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off" aria-label="5km 기록 분">
+              <span class="time-sep">:</span>
+              <input type="text" id="time5k-s" name="time5k-s" placeholder="30" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" aria-label="5km 기록 초">
+            </div>
+            <span class="field-hint">분 : 초</span>
           </div>
           <div class="field">
-            <label for="time10k">10km 기록</label>
-            <input type="text" id="time10k" name="time10k" placeholder="예: 49:00" inputmode="numeric" autocomplete="off">
-            <span class="field-hint">mm:ss 또는 h:mm:ss</span>
+            <label for="time10k-m">10km 기록</label>
+            <div class="time-input-group">
+              <input type="text" id="time10k-m" name="time10k-m" placeholder="49" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off" aria-label="10km 기록 분">
+              <span class="time-sep">:</span>
+              <input type="text" id="time10k-s" name="time10k-s" placeholder="0" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" aria-label="10km 기록 초">
+            </div>
+            <span class="field-hint">분 : 초</span>
           </div>
         </div>
 

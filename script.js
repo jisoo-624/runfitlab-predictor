@@ -14,8 +14,10 @@
   var PACE_BAND_OFFSETS = [-6, -4, -2, 0, 2, 4, 6];
 
   var form = document.getElementById("predict-form");
-  var input5k = document.getElementById("time5k");
-  var input10k = document.getElementById("time10k");
+  var input5kMin = document.getElementById("time5k-m");
+  var input5kSec = document.getElementById("time5k-s");
+  var input10kMin = document.getElementById("time10k-m");
+  var input10kSec = document.getElementById("time10k-s");
   var formError = document.getElementById("form-error");
   var resetBtn = document.getElementById("reset-btn");
   var resultSection = document.getElementById("result-section");
@@ -35,32 +37,40 @@
 
   // ---------- time parsing / formatting ----------
 
-  function parseTimeToSeconds(str) {
-    if (!str) return null;
-    var trimmed = str.trim();
-    if (trimmed === "") return null;
-    if (!/^\d{1,2}(:\d{1,2}){1,2}$/.test(trimmed)) return null;
+  function readMinSecInputs(minInput, secInput) {
+    var rawM = minInput.value.trim();
+    var rawS = secInput.value.trim();
 
-    var parts = trimmed.split(":").map(function (p) {
-      return parseInt(p, 10);
-    });
-
-    var hh = 0, mm = 0, ss = 0;
-    if (parts.length === 2) {
-      mm = parts[0];
-      ss = parts[1];
-    } else {
-      hh = parts[0];
-      mm = parts[1];
-      ss = parts[2];
+    if (rawM === "" && rawS === "") {
+      return { seconds: null, touched: false };
+    }
+    if (!/^\d*$/.test(rawM) || !/^\d*$/.test(rawS)) {
+      return { seconds: null, touched: true };
     }
 
-    if (mm >= 60 || ss >= 60) return null;
+    var mm = rawM === "" ? 0 : parseInt(rawM, 10);
+    var ss = rawS === "" ? 0 : parseInt(rawS, 10);
+    if (ss >= 60) {
+      return { seconds: null, touched: true };
+    }
 
-    var total = hh * 3600 + mm * 60 + ss;
-    if (total <= 0) return null;
-    return total;
+    var total = mm * 60 + ss;
+    if (total <= 0) {
+      return { seconds: null, touched: true };
+    }
+    return { seconds: total, touched: true };
   }
+
+  function sanitizeDigitsOnly(e) {
+    var digits = e.target.value.replace(/\D/g, "");
+    if (digits !== e.target.value) {
+      e.target.value = digits;
+    }
+  }
+
+  [input5kMin, input5kSec, input10kMin, input10kSec].forEach(function (el) {
+    el.addEventListener("input", sanitizeDigitsOnly);
+  });
 
   function pad2(n) {
     return String(Math.round(n)).padStart(2, "0");
@@ -101,18 +111,17 @@
   function calculate() {
     formError.hidden = true;
 
-    var t5 = parseTimeToSeconds(input5k.value);
-    var t10 = parseTimeToSeconds(input10k.value);
+    var r5 = readMinSecInputs(input5kMin, input5kSec);
+    var r10 = readMinSecInputs(input10kMin, input10kSec);
+    var t5 = r5.seconds;
+    var t10 = r10.seconds;
 
-    var raw5 = input5k.value.trim();
-    var raw10 = input10k.value.trim();
-
-    if (raw5 !== "" && t5 === null) {
-      showError("5km 기록 형식을 확인해주세요. 예: 23:30");
+    if (r5.touched && t5 === null) {
+      showError("5km 기록을 확인해주세요. 초는 0~59 사이여야 합니다.");
       return;
     }
-    if (raw10 !== "" && t10 === null) {
-      showError("10km 기록 형식을 확인해주세요. 예: 49:00");
+    if (r10.touched && t10 === null) {
+      showError("10km 기록을 확인해주세요. 초는 0~59 사이여야 합니다.");
       return;
     }
     if (t5 === null && t10 === null) {
