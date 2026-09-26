@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>인앱 저장 테스트 · 런핏랩</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root { --paper: #F3F4F2; --ink: #23262B; --orange: #FF5A1F; --mute: #6B6F76; --line: #D5D7D3; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font-family: Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  .page { max-width: 680px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 20px; margin: 0 0 8px; }
+  h1 .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--orange); margin-right: 6px; vertical-align: middle; }
+  .info { font-size: 13px; line-height: 1.5; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; word-break: break-all; }
+  .info b { color: var(--mute); font-weight: 700; }
+  .guide { font-size: 15px; font-weight: 700; margin: 0 0 12px; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+  figure { margin: 0; }
+  figcaption { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  figcaption small { display: block; font-weight: 400; color: var(--mute); }
+  figure img { display: block; width: 100%; height: auto; border-radius: 8px; background: #ccc; }
+  .note { font-size: 13px; color: var(--mute); margin-top: 16px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="page">
+  <h1><span class="dot"></span>인앱 저장 테스트</h1>
+
+  <div class="info">
+    <div><b>UA</b> <span id="ua"></span></div>
+    <div><b>인앱 판정</b> <span id="inapp"></span></div>
+    <div><b>폰트</b> <span id="font">로딩 중…</span></div>
+  </div>
+
+  <p class="guide">두 이미지를 각각 길게 눌러 저장해 보세요.</p>
+
+  <div class="grid">
+    <figure>
+      <figcaption>① data URL<small>toDataURL</small></figcaption>
+      <img id="img-data" alt="테스트 이미지 (data URL)">
+    </figure>
+    <figure>
+      <figcaption>② blob URL<small>createObjectURL</small></figcaption>
+      <img id="img-blob" alt="테스트 이미지 (blob URL)">
+    </figure>
+  </div>
+
+  <p class="note">
+    환경마다 알려 주세요: ①·② 각각 길게 눌렀을 때 저장 메뉴가 뜨는지, 갤러리에 1080×1920으로 저장되는지.<br>
+    확인 환경: iOS·안드로이드의 인스타그램 인앱, 카카오톡 인앱, Safari, Chrome
+  </p>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var W = 1080, H = 1920;
+  var BG = "#23262B", ORANGE = "#FF5A1F", WHITE = "#FFFFFF", SUB = "#B7BAC0", DIM = "#6B6F76",
+      EASY_FILL = "#34373D", CHARCOAL = "#23262B";
+  var FALLBACK = "-apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+  var family = FALLBACK;
+
+  var ua = navigator.userAgent;
+  document.getElementById("ua").textContent = ua;
+  var inApp = /Instagram|FBAN|FBAV|KAKAOTALK/i.test(ua);
+  document.getElementById("inapp").textContent = inApp ? "인앱 브라우저" : "일반 브라우저";
+
+  function font(weight, size) {
+    return weight + " " + size + "px " + family;
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function text(ctx, str, x, y, weight, size, color, align) {
+    ctx.font = font(weight, size);
+    ctx.fillStyle = color;
+    ctx.textAlign = align || "left";
+    ctx.fillText(str, x, y);
+  }
+
+  // G1 모양의 샘플 (실제 렌더러가 아님, 저장 검증용)
+  var COLUMNS = ["월", "화", "수", "목", "금", "토", "일"];
+  var WEEKS = [
+    { label: "1주", total: "16km", cells: [null, ["easy", "이지", "5km"], null, ["quality", "인터벌", "5km", "400m×5"], null, null, ["long", "롱런", "6km"]] },
+    { label: "2주", total: "17.5km", cells: [null, ["easy", "이지", "5km"], null, ["quality", "템포", "5km", "2.5km"], null, null, ["long", "롱런", "7.5km"]] },
+    { label: "3주", total: "18.5km", cells: [null, ["easy", "이지", "5km"], null, ["quality", "인터벌", "5km", "400m×6"], null, null, ["long", "롱런", "8.5km"]] },
+    { label: "4주", total: "17km", extra: "레이스 포함", cells: [null, ["easy", "이지", "4km"], null, ["quality", "자극", "3km", "가속주 4회"], null, null, ["race", "도전", "10km"]] }
+  ];
+
+  function draw(canvas) {
+    var ctx = canvas.getContext("2d");
+    ctx.fillStyle = BG;
+    ctx.fillRect(0, 0, W, H);
+    ctx.textBaseline = "alphabetic";
+
+    var L = 60, R = W - 60;
+
+    // ① 헤더
+    ctx.fillStyle = ORANGE;
+    ctx.beginPath(); ctx.arc(L + 10, 160, 10, 0, Math.PI * 2); ctx.fill();
+    text(ctx, "런핏랩", L + 32, 170, 700, 30, WHITE);
+    text(ctx, "10km 완주 4주 루틴", L, 250, 800, 64, WHITE);
+    text(ctx, "5km 30:00 · 평소 주 3회, 5~7km · 주 3회 훈련", L, 310, 400, 30, SUB);
+
+    // ② 목표
+    text(ctx, "완주 목표", L, 430, 700, 28, SUB);
+    text(ctx, "1:04:10", L, 510, 800, 80, ORANGE);
+    text(ctx, "6:25/km", R, 510, 700, 44, WHITE, "right");
+
+    // ③ 페이스
+    var paces = [["이지·롱런", "7:15~8:15"], ["템포", "6:30"], ["인터벌", "6:00"]];
+    var pw = (R - L - 24) / 3;
+    paces.forEach(function (p, i) {
+      var x = L + i * (pw + 12);
+      roundRect(ctx, x, 560, pw, 100, 14);
+      ctx.fillStyle = EASY_FILL; ctx.fill();
+      text(ctx, p[0], x + pw / 2, 598, 400, 24, SUB, "center");
+      text(ctx, p[1], x + pw / 2, 642, 800, 34, WHITE, "center");
+    });
+
+    // ④ 캘린더
+    var labelW = 100, gap = 6;
+    var cw = (R - L - labelW - gap * 6) / 7;
+    var gx = L + labelW;
+    COLUMNS.forEach(function (c, i) {
+      text(ctx, c, gx + i * (cw + gap) + cw / 2, 730, 700, 26, SUB, "center");
+    });
+    var rowH = 150, rowGap = 14, gy = 760;
+    WEEKS.forEach(function (wk, r) {
+      var y = gy + r * (rowH + rowGap);
+      text(ctx, wk.label, L, y + 52, 800, 32, WHITE);
+      text(ctx, wk.total, L, y + 88, 400, 22, SUB);
+      if (wk.extra) text(ctx, wk.extra, L, y + 118, 400, 18, DIM);
+      wk.cells.forEach(function (cell, i) {
+        var x = gx + i * (cw + gap);
+        roundRect(ctx, x, y, cw, rowH, 12);
+        if (!cell) {
+          ctx.strokeStyle = "#3A3D43"; ctx.lineWidth = 2; ctx.stroke();
+          return;
+        }
+        var kind = cell[0], fg = WHITE;
+        if (kind === "easy") { ctx.fillStyle = EASY_FILL; ctx.fill(); }
+        else if (kind === "quality") { ctx.fillStyle = WHITE; ctx.fill(); fg = CHARCOAL; }
+        else if (kind === "long") { ctx.strokeStyle = ORANGE; ctx.lineWidth = 2; ctx.stroke(); }
+        else if (kind === "race") { ctx.fillStyle = ORANGE; ctx.fill(); }
+        var cx = x + cw / 2;
+        text(ctx, cell[1], cx, y + 48, 800, 28, fg, "center");
+        text(ctx, cell[2], cx, y + 88, 700, 28, fg, "center");
+        if (cell[3]) text(ctx, cell[3], cx, y + 124, 400, 20, kind === "quality" ? DIM : SUB, "center");
+      });
+    });
+
+    // ⑤ 세션 가이드
+    var guide = [
+      "이지·롱런: 대화가 가능한 속도. 느려도 그대로",
+      "인터벌: 워밍업 1km → 400m를 6:00/km로, 사이 200m 조깅",
+      "템포: 워밍업 1~1.5km → 6:30/km로 2~2.5km 유지",
+      "자극: 이지 2km 뒤 100m 가속주 4회",
+      "10km 도전: 첫 3km는 목표보다 5~10초 느리게"
+    ];
+    guide.forEach(function (g, i) {
+      text(ctx, g, L, 1440 + i * 36, 400, 24, WHITE);
+    });
+
+    // ⑥ 규칙
+    ["강도 훈련 다음 날은 쉬거나 이지", "빠진 날은 몰아서 하지 않기", "통증이 이틀 넘으면 중단"].forEach(function (s, i) {
+      text(ctx, "· " + s, L, 1650 + i * 32, 400, 22, SUB);
+    });
+
+    // ⑦ 푸터
+    text(ctx, "@runfit_lab", L, 1770, 700, 26, ORANGE);
+    text(ctx, "의료 조언이 아닌 일반 훈련 가이드예요 · 저장 테스트용 샘플", R, 1770, 400, 18, DIM, "right");
+  }
+
+  function loadFont() {
+    if (!document.fonts || !document.fonts.load) return Promise.resolve(false);
+    var loads = [400, 700, 800].map(function (w) {
+      return document.fonts.load(w + " 40px Pretendard", "런핏랩 10km");
+    });
+    var timeout = new Promise(function (resolve) { setTimeout(function () { resolve("timeout"); }, 5000); });
+    return Promise.race([Promise.all(loads).then(function () { return document.fonts.ready; }), timeout])
+      .then(function (r) {
+        if (r === "timeout") return false;
+        return [400, 700, 800].every(function (w) { return document.fonts.check(w + " 40px Pretendard", "런"); });
+      })
+      .catch(function () { return false; });
+  }
+
+  loadFont().then(function (ok) {
+    if (ok) family = "Pretendard, " + FALLBACK;
+    document.getElementById("font").textContent = ok ? "Pretendard 로드됨" : "Pretendard 로드 실패 → 시스템 폰트";
+
+    var canvas = document.createElement("canvas");
+    canvas.width = W;
+    canvas.height = H;
+    draw(canvas);
+
+    document.getElementById("img-data").src = canvas.toDataURL("image/png");
+    canvas.toBlob(function (blob) {
+      if (!blob) return;
+      document.getElementById("img-blob").src = URL.createObjectURL(blob);
+    }, "image/png");
+  });
+})();
+</script>
+</body>
+</html>
