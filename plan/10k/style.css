@@ -388,51 +388,7 @@ h1:focus { outline: none; }
   color: var(--orange);
 }
 
-.result-head h1 { margin-bottom: 16px; }
-
-.result-stats {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin: 0;
-}
-
-.stat {
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: var(--white);
-  border: 1px solid var(--line);
-  min-width: 0;
-}
-
-.stat-main {
-  grid-column: 1 / -1;
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--white);
-}
-
-.stat dt {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--mute);
-}
-
-.stat-main dt { color: #B5B8BE; }
-
-.stat dd {
-  margin: 2px 0 0;
-  font-size: 22px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  overflow-wrap: anywhere;
-}
-
-.stat-main dd {
-  font-size: 40px;
-  line-height: 1.15;
-  color: var(--orange);
-}
+.result-head h1 { margin-bottom: 0; }
 
 /* 목표 기록 무리 등 꼭 읽어야 하는 경고 */
 .alert {

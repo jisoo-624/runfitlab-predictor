@@ -1,6 +1,6 @@
 // 스텝 UI, 상태, 결과 화면 (SPEC 8장)
 import {
-  buildPlan, decodeLink, encodeLink, formatClock, formatPace, runningGate, safetyGate, t5FromPace,
+  buildPlan, decodeLink, encodeLink, formatClock, runningGate, safetyGate, t5FromPace,
 } from "../engine/core.js";
 import { CONFIG } from "../engine/plan-10k.js";
 import { altText, fileName, goalLabel, prepareFonts, renderPlan } from "./render.js";
@@ -295,10 +295,6 @@ async function showResult(input, { navigate = true, replace = false } = {}) {
 
   // 상단 요약
   $("#result-eyebrow").textContent = `주 ${plan.freq}회 · ${DAY_LABEL[plan.longRunDay]} 롱런`;
-  $("#stat-goal-label").textContent = plan.goalShown ? goalLabel(plan) : "목표";
-  $("#stat-goal").textContent = plan.goalShown ? formatClock(plan.goalTime) : "걷기 섞어 완주";
-  $("#stat-easy").textContent = plan.pace.easy.map(formatPace).join("~");
-  $("#stat-long").textContent = `${plan.weeks[0].cells[6].km}→${plan.weeks[3].cells[6].km}km`;
 
   const warningKey = plan.notes.find((n) => WARNING_TEXT[n]);
   $("#result-warning").hidden = !warningKey;
