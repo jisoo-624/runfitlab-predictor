@@ -43,21 +43,24 @@ body {
   padding: 0 16px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 15px;
+  gap: 12px;
   white-space: nowrap;
   overflow: hidden;
 }
 
-.topbar-inner span:last-child { overflow: hidden; text-overflow: ellipsis; }
-.topbar-sep { color: var(--mute); }
+.topbar-title {
+  font-size: 16px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--orange);
+.topbar-brand {
+  margin-left: auto;
   flex: none;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--orange);
 }
 
 /* ---------- 페이지 ---------- */
@@ -624,4 +627,10 @@ h1:focus { outline: none; }
   min-height: 44px;
   color: var(--ink);
   font-weight: 700;
+}
+
+@media (max-width: 360px) {
+  .topbar-inner { gap: 8px; }
+  .topbar-title { font-size: 14px; }
+  .topbar-brand { font-size: 11px; }
 }

@@ -86,7 +86,7 @@ export function layout(plan, measure, opts = {}) {
   rect(0, 0, WIDTH, HEIGHT, 0, { fill: C.bg });
 
   // ① 헤더 (120~400)
-  text("brand", [{ text: "Made by RunFitLab", color: C.dim }], { x: R, y: 150, weight: 700, size: 22, maxWidth: 400, align: "right" });
+  text("brand", [{ text: "Made by RunFitLab", color: C.orange }], { x: R, y: 156, weight: 700, size: 28, maxWidth: 480, align: "right" });
   text("title", [{ text: "10km 완주 4주 루틴", color: C.white }], { x: L, y: 256, weight: 800, size: 72, minSize: 56, maxWidth: CONTENT_W });
   if (plan.adjustNote) {
     text("adjust", [{ text: plan.adjustNote, color: C.orange }], { x: L, y: 318, weight: 700, size: 28, minSize: 22, maxWidth: CONTENT_W });
