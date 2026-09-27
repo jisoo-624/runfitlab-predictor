@@ -1,4 +1,4 @@
-// 렌더 검수 (SPEC 11.4, 개발 전용): 37장 이미지 → reports/images/, 컨택트 시트 → reports/contact-sheet.png
+// 렌더 검수 (SPEC 11.4, 개발 전용): 39장 이미지 → reports/images/, 컨택트 시트 → reports/contact-sheet.png
 // 실행: node scripts/render-matrix.mjs
 // 브라우저: Playwright chromium(npx playwright install chromium). 없으면 설치된 Edge/Chrome을 쓴다.
 // overflow가 1개라도 있으면 exit 1. 폰트 로드 실패(시스템 폰트) 상황의 넘침도 함께 검사한다 (7.1).
@@ -48,6 +48,8 @@ cases.push(
   { name: "extreme-t5-6000", input: { ...base, t5: 3600 } },
   { name: "header-adjust-G10", input: { ...base, recentFreq: 2, recentKm: "3to5", freq: 5 } },
   { name: "header-pace-G11", input: { ...base, t5: 1950, effort: "training" } },
+  { name: "target-applied", input: { ...base, target10: 3660 } },
+  { name: "target-too-fast", input: { ...base, target10: 3600 } },
 );
 
 const harness = `<!doctype html><meta charset="utf-8">

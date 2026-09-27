@@ -33,7 +33,9 @@ test("G1: 30:00, rf3, 5to7, f3", () => {
   assert.equal(p.adjustNote, null);
   assert.equal(p.goalShown, true);
   assert.equal(p.inputMode, "time");
-  assert.deepEqual(p.guide.map((g) => g.key), ["easy", "interval", "tempo", "sharpen", "race"]);
+  assert.deepEqual(p.guide.map((g) => g.key), ["easy", "interval", "tempo", "sharpen", "final"]);
+  assert.equal(p.targetApplied, false);
+  assert.equal(p.target10, null);
   assert.match(p.guide[1].text, /400m를 6:00\/km로/);
   assert.match(p.guide[2].text, /6:30\/km로/);
 });
@@ -42,13 +44,13 @@ test("G1 캘린더", () => {
   const p = plan({});
   const row = (w) => w.cells.map((c) => (c ? `${c.cellLabel}${c.km}${c.cellSub ? `(${c.cellSub})` : ""}` : "·")).join(" ");
   assert.deepEqual(p.weeks.map((w) => `${w.week}주 ${w.totalKm}km : ${row(w)}`), [
-    "1주 16km : · 이지5 · 인터벌5(400m×5) · · 롱런6",
-    "2주 17.5km : · 이지5 · 템포5(2.5km) · · 롱런7.5",
-    "3주 18.5km : · 이지5 · 인터벌5(400m×6) · · 롱런8.5",
-    "4주 17km : · 이지4 · 자극3(가속주 4회) · · 도전10",
+    "1주 16km : · 이지런5 · 인터벌5(400m×5) · · 롱런6",
+    "2주 17.5km : · 이지런5 · 템포런5(2.5km) · · 롱런7.5",
+    "3주 18.5km : · 이지런5 · 인터벌5(400m×6) · · 롱런8.5",
+    "4주 17km : · 이지런4 · 가속주3(100m×4) · · 롱런10",
   ]);
   assert.deepEqual(p.weeks[0].cells.map((c) => c?.kind ?? null), [null, "easy", null, "quality", null, null, "long"]);
-  assert.equal(p.weeks[3].cells[6].kind, "race");
+  assert.equal(p.weeks[3].cells[6].kind, "final");
   assert.equal(p.weeks[3].cells[6].cellSub, null);
 });
 
@@ -79,13 +81,13 @@ test("G4: 42:00 런-워크", () => {
   }
   assert.equal(thu[3].sessionId, "sharpen");
   assert.equal(thu[3].kind, "quality");
-  assert.equal(thu[3].cellLabel, "자극");
+  assert.equal(thu[3].cellLabel, "가속주");
   // 일반 이지·롱런 표기 (5.5)
   assert.equal(p.weeks[0].cells[1].cellLabel, "런-워크");
   assert.equal(p.weeks[0].cells[1].kind, "easy");
   assert.deepEqual(p.weeks[0].cells[6], { kind: "long", sessionId: "long", cellLabel: "롱런", cellSub: "런-워크", km: 6 });
-  assert.equal(p.weeks[3].cells[6].cellLabel, "도전");
-  assert.deepEqual(p.guide.map((g) => g.key), ["runwalk", "sharpen", "race_runwalk"]);
+  assert.deepEqual(p.weeks[3].cells[6], { kind: "final", sessionId: "final", cellLabel: "롱런", cellSub: "런-워크", km: 10 });
+  assert.deepEqual(p.guide.map((g) => g.key), ["runwalk", "sharpen", "final_runwalk"]);
 });
 
 test("G5: 21:00 주5 note_fast", () => {
@@ -141,6 +143,55 @@ test("G11: 1km 페이스 6:30 입력", () => {
   assert.deepEqual(paceStr(p), { goal: "6:57", easy: "7:47~8:47", tempo: "7:02", interval: "6:30" });
 });
 
+// ---------- 목표 기록 (예측보다 최대 3% 빠른 것까지) ----------
+
+test("목표 기록: 허용 범위 안이면 목표 기준 페이스", () => {
+  // G1 예측 1:02:33(3753초) → 한계 ceil(3753 × 0.97) = 3641초(1:00:41)
+  const p = plan({ target10: 3660 }); // 1:01:00
+  assert.equal(p.targetApplied, true);
+  assert.equal(p.targetLimit, 3641);
+  assert.deepEqual(p.notes, ["note_target"]);
+  assert.equal(formatClock(p.goalTime), "1:01:00");
+  assert.equal(formatClock(p.t10), "1:02:33"); // 예측은 그대로
+  // p10 = 366, 인터벌 = round(3660 / 2^1.06 / 5) = 351
+  assert.deepEqual(paceStr(p), { goal: "6:06", easy: "7:06~8:06", tempo: "6:21", interval: "5:51" });
+  assert.equal(p.tier, "basic"); // 템플릿·볼륨은 목표와 무관
+  assert.deepEqual(totals(p), [16, 17.5, 18.5, 17]);
+});
+
+test("목표 기록: 한계와 같으면 반영", () => {
+  assert.equal(plan({ target10: 3641 }).targetApplied, true);
+  assert.equal(plan({ target10: 3640 }).targetApplied, false);
+});
+
+test("목표 기록: 너무 빠르면 예측 기준 + 안내", () => {
+  const p = plan({ target10: 3600 }); // 1:00:00
+  assert.equal(p.targetApplied, false);
+  assert.equal(p.target10, 3600);
+  assert.deepEqual(p.notes, ["note_targetTooFast"]);
+  assert.equal(formatClock(p.goalTime), "1:04:10");
+  assert.deepEqual(paceStr(p), { goal: "6:25", easy: "7:15~8:15", tempo: "6:30", interval: "6:00" });
+});
+
+test("목표 기록: 예측보다 느리면 목표 기준 (더 편한 페이스)", () => {
+  const p = plan({ target10: 4200 }); // 1:10:00
+  assert.equal(p.targetApplied, true);
+  assert.deepEqual(paceStr(p), { goal: "7:00", easy: "8:00~9:00", tempo: "7:15", interval: "6:43" });
+});
+
+test("목표 기록: 런-워크 대상이면 무시", () => {
+  const p = plan({ t5: 2520, target10: 5400 });
+  assert.equal(p.targetApplied, false);
+  assert.equal(p.target10, null);
+  assert.equal(p.goalTime, null);
+  assert.deepEqual(p.notes, []);
+});
+
+test("목표 기록: 범위 밖이면 예외", () => {
+  assert.throws(() => plan({ target10: 1199 }), RangeError);
+  assert.throws(() => plan({ target10: 7201 }), RangeError);
+});
+
 // ---------- 템플릿 합계 (5.4 표의 합계 열) ----------
 
 test("템플릿 주간 합계가 5.4 표와 일치", () => {
@@ -179,7 +230,7 @@ function expectedGuide(p) {
     [(c) => c.kind === "quality" && /^int/.test(c.sessionId), "interval", null],
     [(c) => c.kind === "quality" && /^tempo/.test(c.sessionId), "tempo", null],
     [(c) => c.kind === "quality" && c.sessionId === "sharpen", "sharpen", "sharpen"],
-    [(c) => c.kind === "race", "race", "race_runwalk"],
+    [(c) => c.kind === "final", "final", "final_runwalk"],
   ];
   const cells = p.weeks.flatMap((w) => w.cells.filter(Boolean));
   return rows.filter(([match]) => cells.some(match)).map(([, normal, rw]) => (p.runWalk ? rw : normal));
@@ -202,7 +253,7 @@ test("불변식 1~11 (960 조합)", () => {
     // 3
     for (const i of [0, 1]) assert.ok(p.weeks[i + 1].totalKm / p.weeks[i].totalKm - 1 <= 0.15 + 1e-9, `3 ${tag}`);
     // 4
-    const w4 = p.weeks[3].cells.reduce((s, c) => s + (c && c.kind !== "race" ? c.km : 0), 0);
+    const w4 = p.weeks[3].cells.reduce((s, c) => s + (c && c.kind !== "final" ? c.km : 0), 0);
     assert.ok(w4 <= p.weeks[2].totalKm * 0.6 + 1e-9, `4 ${tag}`);
     // 5 (sessionId 기준, 주 경계 포함)
     flat.forEach((c, i) => {
@@ -213,9 +264,10 @@ test("불변식 1~11 (960 조합)", () => {
     });
     // 6
     p.weeks.forEach((w, i) => {
-      assert.equal(w.cells[6]?.kind, i === 3 ? "race" : "long", `6 ${tag}`);
+      assert.equal(w.cells[6]?.kind, i === 3 ? "final" : "long", `6 ${tag}`);
     });
-    assert.equal(flat.filter((c) => c?.kind === "race").length, 1, `6 race ${tag}`);
+    assert.equal(flat.filter((c) => c?.kind === "final").length, 1, `6 final ${tag}`);
+    assert.equal(p.weeks[3].cells[6].km, 10, `6 final 10km ${tag}`);
     // 7
     const longs = p.weeks.slice(0, 3).map((w) => w.cells[6].km);
     assert.ok(longs[0] < longs[1] && longs[1] < longs[2], `7 ${tag}`);
@@ -230,7 +282,7 @@ test("불변식 1~11 (960 조합)", () => {
     // 부가: kind 4종, 런-워크 표기
     for (const c of flat) {
       if (!c) continue;
-      assert.ok(["easy", "quality", "long", "race"].includes(c.kind), `kind ${tag}`);
+      assert.ok(["easy", "quality", "long", "final"].includes(c.kind), `kind ${tag}`);
       if (p.runWalk && c.kind === "easy") assert.equal(c.cellLabel, "런-워크", `rw label ${tag}`);
       if (p.runWalk) assert.ok(!(c.kind === "quality" && isHard(c.sessionId)), `rw sub ${tag}`);
     }

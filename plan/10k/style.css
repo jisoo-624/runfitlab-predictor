@@ -84,6 +84,8 @@ h1 {
 
 h1:focus { outline: none; }
 
+.h1-spaced { margin-bottom: 24px; }
+
 .lead {
   margin: 0 0 24px;
   color: var(--mute);
@@ -238,6 +240,56 @@ h1:focus { outline: none; }
   cursor: pointer;
 }
 
+/* ---------- 10km 목표 기록 (선택) ---------- */
+
+.target {
+  margin-top: 16px;
+  border-top: 1px solid var(--line);
+  padding-top: 8px;
+}
+
+.target-toggle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.target-toggle::after {
+  content: "+";
+  margin-left: auto;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--mute);
+}
+
+.target-toggle[aria-expanded="true"]::after { content: "−"; }
+
+.target-toggle:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 2px;
+}
+
+.optional { margin-left: 4px; font-weight: 400; color: var(--mute); }
+
+.time-field-sm .time-input {
+  width: 76px;
+  height: 64px;
+  font-size: 32px;
+  border-radius: 12px;
+}
+
+.time-field-sm .time-colon { font-size: 30px; }
+
 /* ---------- 버튼 ---------- */
 
 .actions {
@@ -288,12 +340,39 @@ h1:focus { outline: none; }
 
 .gate-body p { margin: 0 0 12px; }
 
-.gate-body ol {
+.table-wrap {
+  overflow-x: auto;
   margin: 0 0 16px;
-  padding-left: 22px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--white);
 }
 
-.gate-body li { margin-bottom: 6px; }
+.gate-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.gate-table th,
+.gate-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.gate-table thead th {
+  font-size: 13px;
+  color: var(--mute);
+  background: var(--paper);
+}
+
+.gate-table tbody tr:last-child th,
+.gate-table tbody tr:last-child td { border-bottom: 0; }
+
+.gate-table tbody th { white-space: nowrap; font-weight: 800; }
+.gate-table td:last-child { white-space: nowrap; }
 
 /* ---------- 결과 ---------- */
 

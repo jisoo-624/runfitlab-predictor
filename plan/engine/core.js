@@ -8,8 +8,8 @@ const DAY_NAMES = ["일", "월", "화", "수", "목", "금", "토"];
 const RECENT_FREQ_MAX = 5;
 
 // 5.7 매핑표의 행 순서. guide는 이 순서로 모은다.
-const GUIDE_ORDER = ["easy", "interval", "tempo", "sharpen", "race"];
-const RUN_WALK_GUIDE = { easy: "runwalk", race: "race_runwalk" };
+const GUIDE_ORDER = ["easy", "interval", "tempo", "sharpen", "final"];
+const RUN_WALK_GUIDE = { easy: "runwalk", final: "final_runwalk" };
 
 // ---------- 시간 표기 ----------
 
@@ -53,22 +53,38 @@ export function validateInput(input, config) {
   if (!isInt(input.freq) || input.freq < fMin || input.freq > fMax) errors.push("freq");
   if (!Object.hasOwn(LONG_RUN_DAYS, input.longRunDay ?? "")) errors.push("longRunDay");
   if (input.effort !== "race" && input.effort !== "training") errors.push("effort");
+  const target = input.target10 ?? null;
+  const [gMin, gMax] = config.targetRange;
+  if (target !== null && (!isInt(target) || target < gMin || target > gMax)) errors.push("target10");
   return errors;
 }
 
 // ---------- 페이스 (5.2) ----------
 
-export function computePaces(t5, config) {
-  const p5 = Math.round(t5 / 5);
-  const t10 = Math.round(t5 * Math.pow(config.distanceKm / 5, config.riegelExponent));
-  const p10 = Math.round(t10 / config.distanceKm);
+// 목표 기록이 예측보다 이 시간보다 빠르면 4주 안에는 무리로 본다
+export function targetLimit(t10, config) {
+  return Math.ceil(t10 * (1 - config.targetMaxFaster));
+}
+
+// target10: 선택 입력한 10km 목표 기록(초). 예측보다 targetMaxFaster 이내로 빠르거나 더 느리면
+// 목표를 기준으로 모든 페이스를 계산한다. 런-워크 대상이면 목표를 쓰지 않는다.
+export function computePaces(t5, config, target10 = null) {
+  const riegel = Math.pow(config.distanceKm / 5, config.riegelExponent);
+  const t10 = Math.round(t5 * riegel);
   const runWalk = t5 > config.runWalkFrom;
+  const targetApplied = target10 !== null && !runWalk && target10 >= targetLimit(t10, config);
+  const base10 = targetApplied ? target10 : t10;
+  const p10 = Math.round(base10 / config.distanceKm);
+  const p5 = Math.round((targetApplied ? base10 / riegel : t5) / 5);
   const easy = [p10 + config.easyOffset[0], p10 + config.easyOffset[1]];
-  const goal = runWalk ? easy[0] : p10 + config.finishBuffer;
+  const goal = runWalk ? easy[0] : targetApplied ? p10 : p10 + config.finishBuffer;
+  let goalTime = null;
+  if (!runWalk) goalTime = targetApplied ? target10 : goal * config.distanceKm;
   return {
     runWalk,
     t10,
-    goalTime: runWalk ? null : goal * config.distanceKm,
+    targetApplied,
+    goalTime,
     pace: { goal, tempo: p10 + config.tempoOffset, interval: p5, easy },
   };
 }
@@ -133,7 +149,7 @@ function makeCell(sessionId, km, runWalk, config) {
       cell.cellSub = null;
     } else if (s.kind === "easy") {
       cell.cellLabel = "런-워크";
-    } else if (s.kind === "long") {
+    } else if (s.kind === "long" || s.kind === "final") {
       cell.cellSub = "런-워크";
     }
   }
@@ -155,7 +171,7 @@ function buildWeeks(tier, freq, runWalk, config) {
 export function guideKeyOf(cell, runWalk, config) {
   let key;
   if (cell.kind === "easy" || cell.kind === "long") key = "easy";
-  else if (cell.kind === "race") key = "race";
+  else if (cell.kind === "final") key = "final";
   else key = config.sessions[cell.sessionId].guideKey;
   return runWalk ? RUN_WALK_GUIDE[key] ?? key : key;
 }
@@ -186,10 +202,12 @@ export function buildPlan(input, config) {
   const sel = selectTier(input, config);
   if (!sel.tier) return { type: "gate_volume", B: sel.B };
 
-  const { runWalk, t10, goalTime, pace } = computePaces(input.t5, config);
+  const target10 = input.target10 ?? null;
+  const { runWalk, t10, targetApplied, goalTime, pace } = computePaces(input.t5, config, target10);
   const notes = [];
   if (input.effort === "training") notes.push("note_training");
   if (input.t5 < config.fastUnder) notes.push("note_fast");
+  if (target10 !== null && !runWalk) notes.push(targetApplied ? "note_target" : "note_targetTooFast");
 
   const weeks = buildWeeks(sel.tier, sel.freq, runWalk, config);
   return {
@@ -205,6 +223,9 @@ export function buildPlan(input, config) {
     t5: input.t5,
     t10,
     goalTime,
+    target10: runWalk ? null : target10,
+    targetApplied,
+    targetLimit: runWalk ? null : targetLimit(t10, config),
     pace,
     longRunDay: input.longRunDay,
     inputMode: input.effort === "training" ? "pace" : "time",
@@ -231,6 +252,7 @@ export function encodeLink(input) {
     `rk=${input.recentKm}`,
     `f=${input.freq}`,
     `ld=${input.longRunDay}`,
+    ...(input.target10 != null ? [`g=${formatMinSec(input.target10)}`] : []),
   ].join("&");
 }
 
@@ -248,6 +270,7 @@ export function decodeLink(search, config) {
     recentKm: p.get("rk"),
     freq: intParam(p.get("f")),
     longRunDay: p.get("ld") ?? "sun",
+    target10: p.has("g") ? parseMinSec(p.get("g")) ?? -1 : null,
   };
   return validateInput(input, config).length ? null : input;
 }

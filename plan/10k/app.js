@@ -3,7 +3,7 @@ import {
   buildPlan, decodeLink, encodeLink, formatClock, runningGate, safetyGate, t5FromPace,
 } from "../engine/core.js";
 import { CONFIG } from "../engine/plan-10k.js";
-import { altText, fileName, prepareFonts, renderPlan } from "./render.js";
+import { altText, fileName, goalLabel, prepareFonts, renderPlan } from "./render.js";
 
 const YOUTUBE_URL = "https://www.youtube.com/@runfitlab";
 const IN_APP = /Instagram|FBAN|FBAV|KAKAOTALK/i.test(navigator.userAgent);
@@ -64,24 +64,42 @@ function readTime() {
   return { t5: sec, effort: "race" };
 }
 
+// 10km 목표 기록 (선택). 펼치지 않았거나 비어 있으면 null
+function readTarget() {
+  if ($("#target-block").hidden || $("#target-fields").hidden) return { target10: null };
+  const h = $("#target-h").value.trim();
+  const m = $("#target-m").value.trim();
+  const s = $("#target-s").value.trim();
+  if (h === "" && m === "" && s === "") return { target10: null };
+  const hh = Number(h || 0);
+  const mm = Number(m || 0);
+  const ss = Number(s || 0);
+  if (mm > 59 || ss > 59) return { error: "분과 초는 0~59 사이로 입력해 주세요." };
+  const sec = hh * 3600 + mm * 60 + ss;
+  const [lo, hi] = CONFIG.targetRange;
+  if (sec < lo || sec > hi) return { error: "10km 목표 기록은 20:00~2:00:00 사이로 입력해 주세요." };
+  return { target10: sec };
+}
+
 function collectInput() {
   const time = readTime();
   return {
     continuous5k: radio("continuous5k") === "yes",
-    pain: radio("pain") === "yes",
+    pain: false, // 통증은 묻지 않고 러너 판단에 맡긴다
     t5: time.t5,
     effort: time.effort,
     recentFreq: Number(radio("recentFreq")),
     recentKm: radio("recentKm"),
     freq: Number(radio("freq")),
     longRunDay: radio("longRunDay") ?? "sun",
+    target10: readTarget().target10 ?? null,
   };
 }
 
 // ---------- 다음 버튼 활성화 ----------
 
 function stepReady(step) {
-  if (step === "step1") return radio("continuous5k") !== null && radio("pain") !== null;
+  if (step === "step1") return radio("continuous5k") !== null;
   if (step === "step2") return !readTime().empty;
   if (step === "step3") {
     const rf = radio("recentFreq");
@@ -91,8 +109,14 @@ function stepReady(step) {
   return false;
 }
 
+function refreshTargetBlock() {
+  const t5 = readTime().t5;
+  $("#target-block").hidden = t5 !== undefined && t5 > CONFIG.runWalkFrom;
+}
+
 function refreshButtons() {
   for (const btn of $$("[data-next]")) btn.disabled = !stepReady(btn.dataset.next);
+  refreshTargetBlock();
   // 최근 0회면 1회 거리는 묻지 않는다
   const noRun = radio("recentFreq") === "0";
   const kmField = $("#recent-km-field");
@@ -106,8 +130,16 @@ document.addEventListener("input", (e) => {
     const digits = e.target.value.replace(/\D/g, "");
     if (digits !== e.target.value) e.target.value = digits;
     $("#time-error").hidden = true;
+    $("#target-error").hidden = true;
   }
   refreshButtons();
+});
+
+$("#target-toggle").addEventListener("click", () => {
+  const fields = $("#target-fields");
+  fields.hidden = !fields.hidden;
+  $("#target-toggle").setAttribute("aria-expanded", String(!fields.hidden));
+  if (!fields.hidden) $("#target-h").focus();
 });
 
 // 분 두 자리를 채우면 초로 넘어간다
@@ -143,16 +175,17 @@ const GATES = {
   gate_5k: {
     title: "10km 전에 5km 무정지부터 만들어요",
     body: `<p>5km를 쉬지 않고 달릴 수 있게 되면 그때 10km 루틴을 시작해요.</p>
-      <ol>
-        <li><b>1~2주</b> 달리기 3분 + 걷기 1분을 6번, 주 3회</li>
-        <li><b>3~4주</b> 달리기 8분 + 걷기 1분을 3~4번, 주 3회</li>
-        <li><b>5주~</b> 걷지 않고 20분 → 30분 → 5km까지 조금씩 늘리기</li>
-      </ol>
+      <div class="table-wrap">
+        <table class="gate-table">
+          <thead><tr><th scope="col">기간</th><th scope="col">훈련</th><th scope="col">횟수</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">1~2주</th><td>달리기 3분 + 걷기 1분 × 6번</td><td>주 3회</td></tr>
+            <tr><th scope="row">3~4주</th><td>달리기 8분 + 걷기 1분 × 3~4번</td><td>주 3회</td></tr>
+            <tr><th scope="row">5주~</th><td>걷지 않고 20분 → 30분 → 5km까지 조금씩 늘리기</td><td>주 3회</td></tr>
+          </tbody>
+        </table>
+      </div>
       <p>5km를 쉬지 않고 달릴 수 있게 되면 다시 만들어 주세요.</p>`,
-  },
-  gate_pain: {
-    title: "회복이 먼저예요",
-    body: "<p>아픈 곳이 있다면 루틴보다 회복이 먼저예요. 통증이 이어지면 진료를 받아 보세요.</p>",
   },
   gate_notRunning: {
     title: "가볍게 달리는 것부터 시작해요",
@@ -188,6 +221,12 @@ for (const btn of $$("[data-next]")) {
         $("#time-error").hidden = false;
         return;
       }
+      const target = readTarget();
+      if (target.error) {
+        $("#target-error").textContent = target.error;
+        $("#target-error").hidden = false;
+        return;
+      }
       return go(NEXT[step]);
     }
     if (step === "step3") {
@@ -215,6 +254,10 @@ function resetForm() {
   $("#time-m").value = "";
   $("#time-s").value = "";
   $("#time-error").hidden = true;
+  for (const id of ["#target-h", "#target-m", "#target-s"]) $(id).value = "";
+  $("#target-fields").hidden = true;
+  $("#target-toggle").setAttribute("aria-expanded", "false");
+  $("#target-error").hidden = true;
   refreshButtons();
 }
 
@@ -228,9 +271,11 @@ for (const btn of $$("[data-restart]")) {
 // ---------- 결과 화면 (8.3) ----------
 
 const NOTE_TEXT = {
-  gentle: "지금 달리는 양에 맞춰 1주차를 가볍게 시작해요.",
-  note_training: "평소 페이스 기준이라 실제 실력은 더 빠를 수 있어요. 안전한 쪽으로 계산했어요.",
-  note_fast: "이 기록이면 완주는 충분해요. 기록 단축 루틴은 곧 공개할게요.",
+  gentle: () => "지금 달리는 양에 맞춰 1주차를 가볍게 시작해요.",
+  note_training: () => "평소 페이스 기준이라 실제 실력은 더 빠를 수 있어요. 안전한 쪽으로 계산했어요.",
+  note_fast: () => "이 기록이면 완주는 충분해요. 기록 단축 루틴은 곧 공개할게요.",
+  note_target: (p) => `목표 기록 ${formatClock(p.target10)}에 맞춰 페이스를 계산했어요.`,
+  note_targetTooFast: (p) => `지금 기록으로 4주 안에 목표(${formatClock(p.target10)})까지 줄이면 무리가 될 수 있어서 예상 기록 기준으로 짰어요. 이번 4주는 ${formatClock(p.targetLimit)}보다 느린 목표를 추천해요.`,
 };
 
 async function showResult(input, { navigate = true, replace = false } = {}) {
@@ -240,16 +285,18 @@ async function showResult(input, { navigate = true, replace = false } = {}) {
   else show("result");
 
   const notes = [
-    plan.tier === "gentle" && NOTE_TEXT.gentle,
-    ...plan.notes.map((n) => NOTE_TEXT[n]),
+    plan.tier === "gentle" && NOTE_TEXT.gentle(plan),
+    ...plan.notes.map((n) => NOTE_TEXT[n](plan)),
   ].filter(Boolean);
   const notesEl = $("#result-notes");
   notesEl.innerHTML = notes.map((n) => `<p>${n}</p>`).join("");
   notesEl.hidden = notes.length === 0;
 
-  $("#howto-mine").textContent = plan.goalShown
-    ? `내 기록 기준: 5km ${formatClock(plan.t5)} → 10km 예측 ${formatClock(plan.t10)}, 완주 목표는 예측보다 1km당 10초 여유를 둔 ${formatClock(plan.goalTime)}이에요.`
-    : `내 기록 기준: 5km ${formatClock(plan.t5)}. 40분을 넘어서 목표 시간 대신 걷기를 섞어서라도 끝까지 완주하는 걸 목표로 잡았어요.`;
+  $("#howto-mine").textContent = !plan.goalShown
+    ? `내 기록 기준: 5km ${formatClock(plan.t5)}. 40분을 넘어서 목표 시간 대신 걷기를 섞어서라도 끝까지 완주하는 걸 목표로 잡았어요.`
+    : plan.targetApplied
+      ? `내 기록 기준: 5km ${formatClock(plan.t5)} → 10km 예측 ${formatClock(plan.t10)}. 목표(${formatClock(plan.goalTime)})가 예측보다 3% 이내라서 목표 기준으로 페이스를 계산했어요.`
+      : `내 기록 기준: 5km ${formatClock(plan.t5)} → 10km 예측 ${formatClock(plan.t10)}. ${goalLabel(plan)}은 예측보다 1km당 10초 여유를 둔 ${formatClock(plan.goalTime)}이에요.`;
 
   const img = $("#result-img");
   img.hidden = true;

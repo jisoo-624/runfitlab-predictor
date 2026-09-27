@@ -33,8 +33,7 @@
   <!-- 스텝 1: 안전 체크 -->
   <section class="screen" data-screen="step1" hidden>
     <p class="progress">1 / 4</p>
-    <h1>먼저 안전부터 확인할게요</h1>
-    <p class="lead">4가지만 답하면 나만의 훈련 루틴을 만들어 드려요.</p>
+    <h1 class="h1-spaced">4가지만 답하면 나만의 훈련 루틴을 만들어 드려요.</h1>
 
     <fieldset class="field">
       <legend>5km를 쉬지 않고 달릴 수 있나요?</legend>
@@ -42,14 +41,6 @@
       <div class="chips">
         <label class="chip"><input type="radio" name="continuous5k" value="yes"><span>네</span></label>
         <label class="chip"><input type="radio" name="continuous5k" value="no"><span>아니요</span></label>
-      </div>
-    </fieldset>
-
-    <fieldset class="field">
-      <legend>지금 달릴 때 아픈 곳이 있나요?</legend>
-      <div class="chips">
-        <label class="chip"><input type="radio" name="pain" value="no"><span>없어요</span></label>
-        <label class="chip"><input type="radio" name="pain" value="yes"><span>있어요</span></label>
       </div>
     </fieldset>
 
@@ -74,6 +65,24 @@
     <p class="error" id="time-error" role="alert" hidden></p>
 
     <button type="button" class="link-btn" id="mode-toggle">기록을 몰라요 → 평소 1km 페이스로 입력</button>
+
+    <div class="target" id="target-block">
+      <button type="button" class="target-toggle" id="target-toggle" aria-expanded="false" aria-controls="target-fields">
+        10km 목표 기록이 있어요 <span class="optional">(선택)</span>
+      </button>
+      <div id="target-fields" hidden>
+        <p class="help">지금 기록으로 4주 안에 무리가 없는 목표면 그 기록에 맞춰 페이스를 짜 드려요.</p>
+        <div class="time-field time-field-sm" role="group" aria-label="10km 목표 기록">
+          <input type="text" id="target-h" class="time-input" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="off" placeholder="1" aria-label="목표 시">
+          <span class="time-colon" aria-hidden="true">:</span>
+          <input type="text" id="target-m" class="time-input" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="00" aria-label="목표 분">
+          <span class="time-colon" aria-hidden="true">:</span>
+          <input type="text" id="target-s" class="time-input" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="00" aria-label="목표 초">
+        </div>
+        <p class="time-hint">시 : 분 : 초</p>
+        <p class="error" id="target-error" role="alert" hidden></p>
+      </div>
+    </div>
 
     <div class="actions">
       <button type="button" class="btn btn-ghost" data-back>이전</button>
@@ -117,10 +126,10 @@
   <!-- 스텝 4: 앞으로 4주 -->
   <section class="screen" data-screen="step4" hidden>
     <p class="progress">4 / 4</p>
-    <h1>앞으로 4주</h1>
+    <h1>앞으로의 훈련 계획</h1>
 
     <fieldset class="field">
-      <legend>주 몇 번 달릴 수 있나요?</legend>
+      <legend>주에 몇 번 훈련할 수 있나요?</legend>
       <div class="chips chips-4">
         <label class="chip"><input type="radio" name="freq" value="2"><span>2회</span></label>
         <label class="chip"><input type="radio" name="freq" value="3"><span>3회</span></label>
@@ -130,7 +139,7 @@
     </fieldset>
 
     <fieldset class="field">
-      <legend>롱런과 10km 도전은 무슨 요일이 편한가요?</legend>
+      <legend>롱런 훈련은 무슨 요일이 편한가요?</legend>
       <div class="chips">
         <label class="chip"><input type="radio" name="longRunDay" value="sat"><span>토요일</span></label>
         <label class="chip"><input type="radio" name="longRunDay" value="sun" checked><span>일요일</span></label>
@@ -178,9 +187,10 @@
         <p id="howto-mine"></p>
         <ul>
           <li><b>10km 예측</b>: 5km 기록에 Riegel 공식(지수 1.06)을 적용했어요. Daniels VDOT와 비교하면 5km 25~40분 구간에서 차이는 15초 이내예요.</li>
-          <li><b>세션 페이스</b>: 이지·롱런은 10km 예측 페이스 + 60~120초, 템포는 + 15초, 인터벌은 5km 페이스예요. 5km 30:00 기준 이지 7:15~8:15, 템포 6:30, 인터벌 6:00으로 Daniels 범위와 비슷하고, 인터벌은 입문자용으로 조금 보수적으로 잡았어요.</li>
+          <li><b>세션 페이스</b>: 이지런·롱런은 10km 예측 페이스 + 60~120초, 템포런은 + 15초, 인터벌은 5km 페이스예요. 5km 30:00 기준 이지런 7:15~8:15, 템포런 6:30, 인터벌 6:00으로 Daniels 범위와 비슷하고, 인터벌은 입문자용으로 조금 보수적으로 잡았어요.</li>
+          <li><b>목표 기록</b>: 목표를 넣으면 예측보다 최대 3% 빠른 목표까지는 그 목표를 기준으로 모든 페이스를 다시 계산해요. 그보다 빠르면 4주 안에는 무리라고 보고 예측 기준으로 짜요.</li>
           <li><b>볼륨</b>: 1주차는 지금 주간 거리의 1.3배 이내, 이후 주간 증가는 15% 이내로 맞췄어요. 입증된 규칙이라기보다 안전 마진이에요.</li>
-          <li><b>테이퍼</b>: 4주차는 레이스를 빼면 3주차 거리의 22~49%만 달려요. 거리는 크게 줄이고 가속주로 다리 감각은 유지해요.</li>
+          <li><b>마지막 주</b>: 4주차는 마지막 롱런 10km를 빼면 3주차 거리의 22~49%만 달려요. 거리는 줄여 다리를 쉬게 하고, 가속주로 감각은 유지한 뒤 10km를 이지런 페이스로 끝까지 달려요.</li>
           <li><b>런-워크</b>: 5km가 40분을 넘으면 예측 공식이 잘 맞지 않아서, 목표 시간 대신 달리기와 걷기를 섞어 끝까지 완주하는 걸 목표로 잡아요.</li>
         </ul>
       </div>

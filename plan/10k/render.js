@@ -53,8 +53,12 @@ export function fileName(plan) {
 
 export function altText(plan) {
   const ladder = plan.weeks.slice(0, 3).map((w) => w.cells[6].km).join("→") + "km";
-  const goal = plan.goalShown ? `완주 목표 ${formatClock(plan.goalTime)}` : "완주 목표: 걷기를 섞어도 완주";
+  const goal = plan.goalShown ? `${goalLabel(plan)} ${formatClock(plan.goalTime)}` : "완주 목표: 걷기를 섞어도 완주";
   return `4주 루틴 이미지: 주 ${plan.freq}회, 롱런 ${ladder}, ${goal}`;
+}
+
+export function goalLabel(plan) {
+  return plan.targetApplied ? "10km 목표 기록" : "10km 예상 기록";
 }
 
 // ---------- layout ----------
@@ -102,7 +106,7 @@ export function layout(plan, measure, opts = {}) {
 
   // ② 목표 (400~540)
   if (plan.goalShown) {
-    text("goalLabel", [{ text: "완주 목표", color: C.sub }], { x: L, y: 440, weight: 700, size: 28, maxWidth: 400 });
+    text("goalLabel", [{ text: goalLabel(plan), color: C.sub }], { x: L, y: 440, weight: 700, size: 28, maxWidth: 400 });
     text("goalTime", [{ text: formatClock(plan.goalTime), color: C.orange }], { x: L, y: 530, weight: 800, size: 96, minSize: 72, maxWidth: 600 });
     text("goalPace", [{ text: `${formatPace(plan.pace.goal)}/km`, color: C.white }], { x: R, y: 530, weight: 700, size: 48, minSize: 36, maxWidth: 340, align: "right" });
   } else {
@@ -114,10 +118,10 @@ export function layout(plan, measure, opts = {}) {
   const easyRange = plan.pace.easy.map(formatPace).join("~");
   const guideKeys = new Set(plan.guide.map((g) => g.key));
   const paceBoxes = plan.runWalk
-    ? [["이지·롱런", easyRange], ["런-워크", "달리기 4분·걷기 1분"]]
+    ? [["이지런·롱런", easyRange], ["런-워크", "달리기 4분·걷기 1분"]]
     : [
-      ["이지·롱런", easyRange],
-      guideKeys.has("tempo") && ["템포", formatPace(plan.pace.tempo)],
+      ["이지런·롱런", easyRange],
+      guideKeys.has("tempo") && ["템포런", formatPace(plan.pace.tempo)],
       guideKeys.has("interval") && ["인터벌", formatPace(plan.pace.interval)],
     ].filter(Boolean);
   const boxGap = 12;
@@ -137,13 +141,9 @@ export function layout(plan, measure, opts = {}) {
   plan.weeks.forEach((wk, r) => {
     const y = CAL.top + r * (CAL.rowH + CAL.rowGap);
     const labelMax = CAL.labelW - 8;
-    const isLast = r === plan.weeks.length - 1;
-    const labelY = isLast ? y + 50 : y + 62;
+    const labelY = y + 62;
     text(`week${wk.week}`, [{ text: `${wk.week}주`, color: C.white }], { x: L, y: labelY, weight: 800, size: 34, minSize: 28, maxWidth: labelMax });
     text(`weekKm${wk.week}`, [{ text: `${wk.totalKm}km`, color: C.sub }], { x: L, y: labelY + 36, weight: 400, size: 24, minSize: 20, maxWidth: labelMax });
-    if (isLast) {
-      text("weekRace", [{ text: "레이스 포함", color: C.dim }], { x: L, y: labelY + 68, weight: 400, size: 20, minSize: 16, maxWidth: labelMax });
-    }
 
     wk.cells.forEach((cell, i) => {
       const x = colX(i);
@@ -157,7 +157,7 @@ export function layout(plan, measure, opts = {}) {
       if (cell.kind === "easy") rect(x, y, CAL.colW, CAL.rowH, 12, { fill: C.easyFill });
       else if (cell.kind === "quality") { rect(x, y, CAL.colW, CAL.rowH, 12, { fill: C.white }); fg = C.charcoal; subColor = "#5C6068"; }
       else if (cell.kind === "long") rect(x + 1, y + 1, CAL.colW - 2, CAL.rowH - 2, 12, { stroke: C.orange, lineWidth: 2 });
-      else if (cell.kind === "race") { rect(x, y, CAL.colW, CAL.rowH, 12, { fill: C.orange }); subColor = C.white; }
+      else if (cell.kind === "final") { rect(x, y, CAL.colW, CAL.rowH, 12, { fill: C.orange }); subColor = C.white; }
 
       const cx = x + CAL.colW / 2;
       const maxW = CAL.colW - CAL.cellPad * 2;
@@ -183,7 +183,7 @@ export function layout(plan, measure, opts = {}) {
   });
 
   // ⑥ 규칙 (1600~1700)
-  ["강도 훈련 다음 날은 쉬거나 이지", "빠진 날은 몰아서 하지 않기", "통증이 이틀 넘으면 중단"].forEach((rule, i) => {
+  ["강도 훈련 다음 날은 쉬거나 이지런", "빠진 날은 몰아서 하지 않기", "통증이 이틀 넘으면 중단"].forEach((rule, i) => {
     text(`rule${i}`, [{ text: `· ${rule}`, color: C.sub }], { x: L, y: 1632 + i * 32, weight: 400, size: 24, minSize: 20, maxWidth: CONTENT_W });
   });
 

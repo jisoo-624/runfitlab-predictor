@@ -5,7 +5,7 @@ import { CONFIG } from "../plan/engine/plan-10k.js";
 
 const g1 = {
   continuous5k: true, pain: false, effort: "race", longRunDay: "sun",
-  t5: 1800, recentFreq: 3, recentKm: "5to7", freq: 3,
+  t5: 1800, recentFreq: 3, recentKm: "5to7", freq: 3, target10: null,
 };
 
 test("8.4 예시 형식", () => {
@@ -19,6 +19,8 @@ test("왕복: 입력 → 링크 → 입력 → 같은 plan", () => {
     { ...g1, t5: 1950, effort: "training" },
     { ...g1, t5: 3600, longRunDay: "sat", recentFreq: 5, recentKm: "gt7", freq: 5 },
     { ...g1, t5: 840, recentKm: "lt3", freq: 2 },
+    { ...g1, target10: 3660 },
+    { ...g1, target10: 3600 },
   ];
   for (const input of cases) {
     const back = decodeLink(encodeLink(input), CONFIG);
@@ -36,6 +38,12 @@ test("1km 페이스 입력은 t5 + e=training", () => {
   const d = decodeLink("t=32:30&e=training&rf=3&rk=5to7&f=3&ld=sun", CONFIG);
   assert.equal(d.t5, 1950);
   assert.equal(buildPlan(d, CONFIG).inputMode, "pace");
+});
+
+test("목표 기록은 g=m:ss (선택)", () => {
+  assert.equal(encodeLink({ ...g1, target10: 3660 }), "t=30:00&e=race&rf=3&rk=5to7&f=3&ld=sun&g=61:00");
+  assert.equal(decodeLink("t=30:00&e=race&rf=3&rk=5to7&f=3&g=61:00", CONFIG).target10, 3660);
+  assert.equal(decodeLink("t=30:00&e=race&rf=3&rk=5to7&f=3", CONFIG).target10, null);
 });
 
 test("ld 없으면 sun", () => {
@@ -61,6 +69,9 @@ test("잘못된 파라미터는 null", () => {
     "t=30:00&e=race&rf=3&rk=5to7&f=1",
     "t=30:00&e=race&rf=3&rk=5to7&f=3.5",
     "t=30:00&e=race&rf=3&rk=5to7&f=3&ld=mon",
+    "t=30:00&e=race&rf=3&rk=5to7&f=3&g=abc",
+    "t=30:00&e=race&rf=3&rk=5to7&f=3&g=19:59",   // 목표 < 20:00
+    "t=30:00&e=race&rf=3&rk=5to7&f=3&g=120:01",  // 목표 > 2:00:00
   ];
   for (const q of bad) assert.equal(decodeLink(q, CONFIG), null, q);
 });
