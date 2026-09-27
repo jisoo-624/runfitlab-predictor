@@ -1,7 +1,7 @@
 // 4주 루틴 이미지 (SPEC 7장)
 // layout(plan, measure, opts): 그리기 목록 + overflow 목록을 반환. 글자 폭 측정은 주입받는다.
 // draw(ctx, layout): 목록대로 canvas에 그린다.
-import { RECENT_KM_LABEL, formatClock, formatPace } from "../engine/core.js";
+import { formatClock, formatPace } from "../engine/core.js";
 
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
@@ -34,16 +34,6 @@ const CAL = {
   cellPad: 6,
 };
 CAL.colW = (CONTENT_W - CAL.labelW - CAL.colGap * 6) / 7;
-
-// ---------- 헤더 문구 (7.2) ----------
-
-export function basisLine(plan) {
-  const first = plan.inputMode === "pace"
-    ? `1km ${formatPace(Math.round(plan.t5 / 5))}`
-    : `5km ${formatClock(plan.t5)}`;
-  const recent = `평소 주 ${plan.recentFreq}회${plan.recentFreq >= 5 ? " 이상" : ""}, ${RECENT_KM_LABEL[plan.recentKm]}`;
-  return `${first} · ${recent} · 주 ${plan.freq}회 훈련`;
-}
 
 export function fileName(plan) {
   const mm = Math.floor(plan.t5 / 60);
@@ -96,41 +86,46 @@ export function layout(plan, measure, opts = {}) {
   rect(0, 0, WIDTH, HEIGHT, 0, { fill: C.bg });
 
   // ① 헤더 (120~400)
-  ops.push({ type: "circle", x: L + 10, y: 160, r: 10, fill: C.orange });
-  text("brand", [{ text: "런핏랩", color: C.white }], { x: L + 32, y: 171, weight: 700, size: 30, maxWidth: 400 });
-  text("title", [{ text: "10km 완주 4주 루틴", color: C.white }], { x: L, y: 262, weight: 800, size: 72, minSize: 56, maxWidth: CONTENT_W });
-  text("basis", [{ text: basisLine(plan), color: C.sub }], { x: L, y: 322, weight: 400, size: 30, minSize: 24, maxWidth: CONTENT_W });
+  text("brand", [{ text: "Made by RunFitLab", color: C.dim }], { x: R, y: 150, weight: 700, size: 22, maxWidth: 400, align: "right" });
+  text("title", [{ text: "10km 완주 4주 루틴", color: C.white }], { x: L, y: 256, weight: 800, size: 72, minSize: 56, maxWidth: CONTENT_W });
   if (plan.adjustNote) {
-    text("adjust", [{ text: plan.adjustNote, color: C.orange }], { x: L, y: 372, weight: 700, size: 28, minSize: 22, maxWidth: CONTENT_W });
+    text("adjust", [{ text: plan.adjustNote, color: C.orange }], { x: L, y: 318, weight: 700, size: 28, minSize: 22, maxWidth: CONTENT_W });
   }
 
-  // ② 목표 (400~540)
+  // ② 목표 (400~540): 기록과 페이스를 한 줄에
   if (plan.goalShown) {
-    text("goalLabel", [{ text: goalLabel(plan), color: C.sub }], { x: L, y: 440, weight: 700, size: 28, maxWidth: 400 });
-    text("goalTime", [{ text: formatClock(plan.goalTime), color: C.orange }], { x: L, y: 530, weight: 800, size: 96, minSize: 72, maxWidth: 600 });
-    text("goalPace", [{ text: `${formatPace(plan.pace.goal)}/km`, color: C.white }], { x: R, y: 530, weight: 700, size: 48, minSize: 36, maxWidth: 340, align: "right" });
+    text("goalLabel", [{ text: goalLabel(plan), color: C.sub }], { x: L, y: 380, weight: 700, size: 34, maxWidth: 500 });
+    const pace = `${formatPace(plan.pace.goal)}/km`;
+    const paceFont = (px) => `700 ${px}px ${family}`;
+    const paceW = measure(paceFont(52), pace);
+    const gap = 28;
+    text("goalTime", [{ text: formatClock(plan.goalTime), color: C.orange }], { x: L, y: 500, weight: 800, size: 124, minSize: 88, maxWidth: CONTENT_W - paceW - gap });
+    const timeOp = ops.filter((o) => o.id === "goalTime").at(-1);
+    const timeEnd = timeOp.x + measure(timeOp.font, timeOp.text);
+    text("goalPace", [{ text: pace, color: C.white }], { x: timeEnd + gap, y: 500, weight: 700, size: 52, minSize: 40, maxWidth: R - timeEnd - gap });
   } else {
-    text("goalLabel", [{ text: "목표", color: C.sub }], { x: L, y: 440, weight: 700, size: 28, maxWidth: 400 });
-    text("goalRunWalk", [{ text: "걷기를 섞어도 끝까지 완주", color: C.orange }], { x: L, y: 515, weight: 800, size: 64, minSize: 44, maxWidth: CONTENT_W });
+    text("goalLabel", [{ text: "목표", color: C.sub }], { x: L, y: 380, weight: 700, size: 34, maxWidth: 400 });
+    text("goalRunWalk", [{ text: "걷기를 섞어도 끝까지 완주", color: C.orange }], { x: L, y: 470, weight: 800, size: 64, minSize: 44, maxWidth: CONTENT_W });
   }
 
   // ③ 페이스 (540~680). 루틴에 등장한 세션의 페이스만 보여준다.
-  const easyRange = plan.pace.easy.map(formatPace).join("~");
+  const easyRange = `${plan.pace.easy.map(formatPace).join("~")}/km`;
   const guideKeys = new Set(plan.guide.map((g) => g.key));
   const paceBoxes = plan.runWalk
     ? [["이지런·롱런", easyRange], ["런-워크", "달리기 4분·걷기 1분"]]
     : [
       ["이지런·롱런", easyRange],
-      guideKeys.has("tempo") && ["템포런", formatPace(plan.pace.tempo)],
-      guideKeys.has("interval") && ["인터벌", formatPace(plan.pace.interval)],
+      guideKeys.has("tempo") && ["템포런", `${formatPace(plan.pace.tempo)}/km`],
+      guideKeys.has("interval") && ["인터벌", `${formatPace(plan.pace.interval)}/km`],
     ].filter(Boolean);
   const boxGap = 12;
   const boxW = (CONTENT_W - boxGap * (paceBoxes.length - 1)) / paceBoxes.length;
   paceBoxes.forEach(([label, value], i) => {
     const x = L + i * (boxW + boxGap);
-    rect(x, 562, boxW, 110, 14, { fill: C.easyFill });
-    text(`paceLabel${i}`, [{ text: label, color: C.sub }], { x: x + boxW / 2, y: 602, weight: 400, size: 24, minSize: 20, maxWidth: boxW - 24, align: "center" });
-    text(`paceValue${i}`, [{ text: value, color: C.white }], { x: x + boxW / 2, y: 648, weight: 800, size: 36, minSize: 26, maxWidth: boxW - 24, align: "center" });
+    rect(x, 540, boxW, 128, 16, { fill: C.easyFill });
+    rect(x + boxW / 2 - 24, 552, 48, 5, 2.5, { fill: C.orange });
+    text(`paceLabel${i}`, [{ text: label, color: C.white }], { x: x + boxW / 2, y: 598, weight: 700, size: 26, minSize: 20, maxWidth: boxW - 24, align: "center" });
+    text(`paceValue${i}`, [{ text: value, color: C.white }], { x: x + boxW / 2, y: 648, weight: 800, size: 40, minSize: 26, maxWidth: boxW - 20, align: "center" });
   });
 
   // ④ 캘린더 (680~1400)
@@ -183,13 +178,14 @@ export function layout(plan, measure, opts = {}) {
   });
 
   // ⑥ 규칙 (1600~1700)
-  ["강도 훈련 다음 날은 쉬거나 이지런", "빠진 날은 몰아서 하지 않기", "통증이 이틀 넘으면 중단"].forEach((rule, i) => {
+  const hasHard = guideKeys.has("interval") || guideKeys.has("tempo");
+  [hasHard && "강도 훈련 다음 날은 쉬거나 이지런", "빠진 날은 몰아서 하지 않기", "통증이 이틀 넘으면 중단"].filter(Boolean).forEach((rule, i) => {
     text(`rule${i}`, [{ text: `· ${rule}`, color: C.sub }], { x: L, y: 1632 + i * 32, weight: 400, size: 24, minSize: 20, maxWidth: CONTENT_W });
   });
 
   // ⑦ 푸터 (1700~1760)
-  text("handle", [{ text: "@runfit_lab", color: C.orange }], { x: L, y: 1748, weight: 700, size: 28, maxWidth: 260 });
-  text("disclaimer", [{ text: "의료 조언이 아닌 일반 훈련 가이드예요", color: C.dim }], { x: R, y: 1748, weight: 400, size: 20, minSize: 16, maxWidth: CONTENT_W - 280, align: "right" });
+  text("disclaimer", [{ text: "의료 조언이 아닌 일반 훈련 가이드예요", color: C.dim }], { x: L, y: 1748, weight: 400, size: 20, minSize: 16, maxWidth: CONTENT_W - 280 });
+  text("handle", [{ text: "@runfit_lab", color: C.orange }], { x: R, y: 1748, weight: 700, size: 28, maxWidth: 260, align: "right" });
 
   return { width: WIDTH, height: HEIGHT, family, ops, overflow };
 }
