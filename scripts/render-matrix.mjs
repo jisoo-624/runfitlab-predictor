@@ -1,4 +1,4 @@
-// 렌더 검수 (SPEC 11.4, 개발 전용): 39장 이미지 → reports/images/, 컨택트 시트 → reports/contact-sheet.png
+// 렌더 검수 (SPEC 11.4, 개발 전용): 루틴 39장 + 5km 무정지 만들기 1장 이미지 → reports/images/, 컨택트 시트 → reports/contact-sheet.png
 // 실행: node scripts/render-matrix.mjs
 // 브라우저: Playwright chromium(npx playwright install chromium). 없으면 설치된 Edge/Chrome을 쓴다.
 // overflow가 1개라도 있으면 exit 1. 폰트 로드 실패(시스템 폰트) 상황의 넘침도 함께 검사한다 (7.1).
@@ -50,6 +50,7 @@ cases.push(
   { name: "header-pace-G11", input: { ...base, t5: 1950, effort: "training" } },
   { name: "target-applied", input: { ...base, target10: 3660 } },
   { name: "target-too-fast", input: { ...base, target10: 3540 } },
+  { name: "build5k", build5k: true },
 );
 
 const harness = `<!doctype html><meta charset="utf-8">
@@ -57,7 +58,7 @@ const harness = `<!doctype html><meta charset="utf-8">
 <script type="module">
 import { buildPlan } from "/plan/engine/core.js";
 import { CONFIG } from "/plan/engine/plan-10k.js";
-import { FALLBACK_FAMILY, layout, prepareFonts, renderPlan } from "/plan/10k/render.js";
+import { FALLBACK_FAMILY, layout, layoutBuild5k, prepareFonts, renderBuild5k, renderPlan } from "/plan/10k/render.js";
 const family = await prepareFonts();
 const measureCtx = document.createElement("canvas").getContext("2d");
 const measure = (f, s) => { measureCtx.font = f; return measureCtx.measureText(s).width; };
@@ -68,6 +69,12 @@ window.renderCase = (input) => {
   const fallback = layout(plan, measure, { family: FALLBACK_FAMILY }).overflow;
   return { plan: { type: plan.type, tier: plan.tier, freq: plan.freq, runWalk: plan.runWalk },
            data: canvas.toDataURL("image/png"), overflow: lay.overflow, fallback };
+};
+window.renderBuild5k = () => {
+  const canvas = document.createElement("canvas");
+  const lay = renderBuild5k(canvas, family);
+  const fallback = layoutBuild5k(measure, { family: FALLBACK_FAMILY }).overflow;
+  return { plan: { type: "plan" }, data: canvas.toDataURL("image/png"), overflow: lay.overflow, fallback };
 };
 window.contactSheet = async (items, cols) => {
   const tw = 270, th = 480, pad = 16, labelH = 28;
@@ -127,7 +134,9 @@ mkdirSync(IMG, { recursive: true });
 const results = [];
 let failures = 0;
 for (const c of cases) {
-  const r = await page.evaluate((input) => window.renderCase(input), c.input);
+  const r = c.build5k
+    ? await page.evaluate(() => window.renderBuild5k())
+    : await page.evaluate((input) => window.renderCase(input), c.input);
   writeFileSync(join(IMG, `${c.name}.png`), Buffer.from(r.data.split(",")[1], "base64"));
   const problems = [];
   if (r.plan.type !== "plan") problems.push(`plan 아님: ${r.plan.type}`);

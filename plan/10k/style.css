@@ -343,39 +343,7 @@ h1:focus { outline: none; }
 
 .gate-body p { margin: 0 0 12px; }
 
-.table-wrap {
-  overflow-x: auto;
-  margin: 0 0 16px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--white);
-}
 
-.gate-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 15px;
-}
-
-.gate-table th,
-.gate-table td {
-  padding: 12px;
-  border-bottom: 1px solid var(--line);
-  text-align: left;
-  vertical-align: top;
-}
-
-.gate-table thead th {
-  font-size: 13px;
-  color: var(--mute);
-  background: var(--paper);
-}
-
-.gate-table tbody tr:last-child th,
-.gate-table tbody tr:last-child td { border-bottom: 0; }
-
-.gate-table tbody th { white-space: nowrap; font-weight: 800; }
-.gate-table td:last-child { white-space: nowrap; }
 
 /* ---------- 결과 ---------- */
 

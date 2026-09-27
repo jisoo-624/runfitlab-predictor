@@ -3,7 +3,9 @@ import {
   buildPlan, decodeLink, encodeLink, formatClock, runningGate, safetyGate, t5FromPace,
 } from "../engine/core.js";
 import { CONFIG } from "../engine/plan-10k.js";
-import { altText, fileName, goalLabel, prepareFonts, renderPlan } from "./render.js";
+import {
+  BUILD_5K_ALT, BUILD_5K_FILE, altText, fileName, goalLabel, prepareFonts, renderBuild5k, renderPlan,
+} from "./render.js";
 
 const YOUTUBE_URL = "https://www.youtube.com/@runfitlab";
 const IN_APP = /Instagram|FBAN|FBAV|KAKAOTALK/i.test(navigator.userAgent);
@@ -39,7 +41,7 @@ window.addEventListener("popstate", (e) => {
     const input = decodeLink(location.search, CONFIG);
     if (input) return showResult(input, { navigate: false });
   }
-  show(STEPS.includes(screen) || screen === "gate" ? screen : "step1");
+  show(STEPS.includes(screen) || screen === "gate" || screen === "build5k" ? screen : "step1");
 });
 
 // ---------- 입력 읽기 ----------
@@ -172,21 +174,6 @@ $("#mode-toggle").addEventListener("click", () => setTimeMode(state.timeMode ===
 // ---------- 스텝 진행 + 게이트 (4장) ----------
 
 const GATES = {
-  gate_5k: {
-    title: "10km 전에 5km 무정지부터 만들어요",
-    body: `<p>5km를 쉬지 않고 달릴 수 있게 되면 그때 10km 루틴을 시작해요.</p>
-      <div class="table-wrap">
-        <table class="gate-table">
-          <thead><tr><th scope="col">기간</th><th scope="col">훈련</th><th scope="col">횟수</th></tr></thead>
-          <tbody>
-            <tr><th scope="row">1~2주</th><td>달리기 3분 + 걷기 1분 × 6번</td><td>주 3회</td></tr>
-            <tr><th scope="row">3~4주</th><td>달리기 8분 + 걷기 1분 × 3~4번</td><td>주 3회</td></tr>
-            <tr><th scope="row">5주~</th><td>걷지 않고 20분 → 30분 → 5km까지 조금씩 늘리기</td><td>주 3회</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p>5km를 쉬지 않고 달릴 수 있게 되면 다시 만들어 주세요.</p>`,
-  },
   gate_notRunning: {
     title: "가볍게 달리는 것부터 시작해요",
     body: "<p>최근 한 달 달리지 않았다면 2~3주 동안 주 2~3회 가볍게 달린 뒤 다시 만들어 주세요.</p>",
@@ -197,7 +184,24 @@ const GATES = {
   },
 };
 
+// 5km를 쉬지 않고 달리지 못하면 결과 화면처럼 "5km 무정지 만들기" 이미지를 보여 준다
+async function showBuild5k() {
+  go("build5k");
+  const img = $("#build5k-img");
+  if (img.src) return;
+  fontFamilyPromise ??= prepareFonts();
+  const family = await fontFamilyPromise;
+  const canvas = document.createElement("canvas");
+  renderBuild5k(canvas, family);
+  img.src = canvas.toDataURL("image/png");
+  img.alt = BUILD_5K_ALT;
+  img.dataset.filename = BUILD_5K_FILE;
+  img.hidden = false;
+  $("#build5k-loading").hidden = true;
+}
+
 function showGate(result) {
+  if (result.type === "gate_5k") return showBuild5k();
   const g = GATES[result.type];
   $("#gate-title").textContent = g.title;
   $("#gate-body").innerHTML = typeof g.body === "function" ? g.body(result) : g.body;
@@ -334,20 +338,22 @@ async function showResult(input, { navigate = true, replace = false } = {}) {
 
 // 인앱 브라우저에서는 다운로드를 시도하지 않고 길게 눌러 저장을 안내한다
 if (IN_APP) {
-  $("#save-btn").hidden = true;
-  $("#save-hint").hidden = false;
+  for (const btn of $$(".save-btn")) btn.hidden = true;
+  for (const hint of $$(".save-hint")) hint.hidden = false;
 }
 
-$("#save-btn").addEventListener("click", () => {
-  const img = $("#result-img");
-  if (img.hidden || !img.src) return;
-  const a = document.createElement("a");
-  a.href = img.src;
-  a.download = img.dataset.filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-});
+for (const btn of $$(".save-btn")) {
+  btn.addEventListener("click", () => {
+    const img = $(btn.dataset.img);
+    if (img.hidden || !img.src) return;
+    const a = document.createElement("a");
+    a.href = img.src;
+    a.download = img.dataset.filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  });
+}
 
 let toastTimer;
 function toast(msg) {

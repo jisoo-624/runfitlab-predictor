@@ -153,6 +153,28 @@
     </div>
   </section>
 
+  <!-- 5km 무정지 만들기 (5km를 쉬지 않고 달리지 못하는 경우) -->
+  <section class="screen" data-screen="build5k" hidden>
+    <div class="result-head">
+      <h1>5km를 쉬지 않고 달릴 수 있게 되면 그때 10km 루틴을 시작해요.</h1>
+    </div>
+
+    <figure class="result-figure">
+      <div class="result-loading" id="build5k-loading">이미지를 만드는 중…</div>
+      <img id="build5k-img" alt="" hidden>
+      <figcaption>저장해 두고 이 순서대로 5km 무정지를 만들어 보세요.</figcaption>
+    </figure>
+
+    <div class="save-bar">
+      <button type="button" class="btn btn-primary btn-block save-btn" data-img="#build5k-img">이미지 저장</button>
+      <p class="save-hint" hidden><b>이미지를 길게 눌러</b> 저장하세요</p>
+    </div>
+
+    <div class="result-actions">
+      <button type="button" class="btn btn-ghost" data-restart>처음부터 다시</button>
+    </div>
+  </section>
+
   <!-- 게이트 -->
   <section class="screen" data-screen="gate" hidden>
     <h1 id="gate-title"></h1>
@@ -182,8 +204,8 @@
     </figure>
 
     <div class="save-bar">
-      <button type="button" class="btn btn-primary btn-block" id="save-btn">이미지 저장</button>
-      <p class="save-hint" id="save-hint" hidden><b>이미지를 길게 눌러</b> 저장하세요</p>
+      <button type="button" class="btn btn-primary btn-block save-btn" data-img="#result-img">이미지 저장</button>
+      <p class="save-hint" hidden><b>이미지를 길게 눌러</b> 저장하세요</p>
     </div>
 
     <div class="result-actions">
