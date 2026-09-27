@@ -252,14 +252,14 @@ h1:focus { outline: none; }
   display: flex;
   align-items: center;
   width: 100%;
-  min-height: 48px;
+  min-height: 56px;
   padding: 0;
   border: 0;
   background: none;
   color: var(--ink);
   font: inherit;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
   text-align: left;
   cursor: pointer;
 }
@@ -267,7 +267,7 @@ h1:focus { outline: none; }
 .target-toggle::after {
   content: "+";
   margin-left: auto;
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 400;
   color: var(--mute);
 }
@@ -279,7 +279,7 @@ h1:focus { outline: none; }
   outline-offset: 2px;
 }
 
-.optional { margin-left: 4px; font-weight: 400; color: var(--mute); }
+.optional { margin-left: 6px; font-size: 16px; font-weight: 400; color: var(--mute); }
 
 .time-field-sm .time-input {
   width: 76px;
@@ -376,17 +376,128 @@ h1:focus { outline: none; }
 
 /* ---------- 결과 ---------- */
 
-.notes {
-  margin-bottom: 16px;
-  padding: 12px 14px;
-  border-left: 4px solid var(--orange);
-  background: var(--white);
-  border-radius: 8px;
+.result-head { margin-bottom: 16px; }
+
+.result-eyebrow {
+  margin: 0 0 4px;
   font-size: 15px;
+  font-weight: 700;
+  color: var(--orange);
 }
 
-.notes p { margin: 0; }
-.notes p + p { margin-top: 6px; }
+.result-head h1 { margin-bottom: 16px; }
+
+.result-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.stat {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  min-width: 0;
+}
+
+.stat-main {
+  grid-column: 1 / -1;
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--white);
+}
+
+.stat dt {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mute);
+}
+
+.stat-main dt { color: #B5B8BE; }
+
+.stat dd {
+  margin: 2px 0 0;
+  font-size: 22px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.stat-main dd {
+  font-size: 40px;
+  line-height: 1.15;
+  color: var(--orange);
+}
+
+/* 목표 기록 무리 등 꼭 읽어야 하는 경고 */
+.alert {
+  margin-bottom: 16px;
+  padding: 16px 16px 16px 52px;
+  border: 2px solid var(--orange);
+  border-radius: 14px;
+  background: #FFE9DF;
+  position: relative;
+}
+
+.alert::before {
+  content: "!";
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: var(--white);
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 24px;
+  text-align: center;
+}
+
+.alert-title {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.alert-body {
+  margin: 0;
+  font-size: 15px;
+  color: #3D2A20;
+}
+
+.notes {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.notes li {
+  position: relative;
+  padding: 12px 14px 12px 36px;
+  border-radius: 12px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.notes li::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 21px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--orange);
+}
 
 .result-figure { margin: 0; }
 
@@ -399,6 +510,13 @@ h1:focus { outline: none; }
   -webkit-touch-callout: default;
 }
 
+.result-figure figcaption {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--mute);
+}
+
 .result-loading {
   display: flex;
   align-items: center;
@@ -409,15 +527,29 @@ h1:focus { outline: none; }
   color: #B5B8BE;
 }
 
+/* 이미지가 길어도 저장 버튼은 항상 화면 아래에 */
+.save-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  margin: 12px -16px 0;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  background: rgba(243, 244, 242, 0.96);
+  border-top: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.btn-block { width: 100%; min-height: 56px; font-size: 18px; }
+
 .save-hint {
-  margin: 16px 0 0;
+  margin: 0;
   padding: 14px;
   border-radius: 12px;
-  background: var(--ink);
+  background: var(--orange);
   color: var(--white);
   text-align: center;
   font-size: 17px;
-  font-weight: 800;
 }
 
 .result-actions {
@@ -442,22 +574,25 @@ h1:focus { outline: none; }
 }
 
 .howto {
-  margin-top: 24px;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  margin-top: 16px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--white);
 }
 
 .howto summary {
-  min-height: 52px;
+  min-height: 56px;
   display: flex;
   align-items: center;
+  font-size: 16px;
   font-weight: 700;
   cursor: pointer;
 }
 
 .howto-body {
-  padding-bottom: 12px;
-  font-size: 14px;
+  padding-bottom: 16px;
+  font-size: 15px;
   color: #3D4147;
 }
 

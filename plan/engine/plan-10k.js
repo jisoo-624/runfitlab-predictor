@@ -107,7 +107,7 @@ export const CONFIG = {
   volumeCapRatio: 1.3,
   freqJumpMax: 2,
   paceInputRange: [240, 720],
-  targetMaxFaster: 0.03,    // 목표 기록은 예측보다 최대 3% 빠른 것까지 반영
+  targetMaxFaster: 0.05,    // 목표 기록은 예측보다 최대 5% 빠른 것까지 반영
   targetRange: [1200, 7200],
   t5Range: [840, 3600],
   freqRange: [2, 5],

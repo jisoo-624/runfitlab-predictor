@@ -49,7 +49,7 @@ cases.push(
   { name: "header-adjust-G10", input: { ...base, recentFreq: 2, recentKm: "3to5", freq: 5 } },
   { name: "header-pace-G11", input: { ...base, t5: 1950, effort: "training" } },
   { name: "target-applied", input: { ...base, target10: 3660 } },
-  { name: "target-too-fast", input: { ...base, target10: 3600 } },
+  { name: "target-too-fast", input: { ...base, target10: 3540 } },
 );
 
 const harness = `<!doctype html><meta charset="utf-8">

@@ -20,7 +20,7 @@ test("왕복: 입력 → 링크 → 입력 → 같은 plan", () => {
     { ...g1, t5: 3600, longRunDay: "sat", recentFreq: 5, recentKm: "gt7", freq: 5 },
     { ...g1, t5: 840, recentKm: "lt3", freq: 2 },
     { ...g1, target10: 3660 },
-    { ...g1, target10: 3600 },
+    { ...g1, target10: 3540 },
   ];
   for (const input of cases) {
     const back = decodeLink(encodeLink(input), CONFIG);

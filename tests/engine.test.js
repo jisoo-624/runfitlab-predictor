@@ -143,13 +143,13 @@ test("G11: 1km 페이스 6:30 입력", () => {
   assert.deepEqual(paceStr(p), { goal: "6:57", easy: "7:47~8:47", tempo: "7:02", interval: "6:30" });
 });
 
-// ---------- 목표 기록 (예측보다 최대 3% 빠른 것까지) ----------
+// ---------- 목표 기록 (예측보다 최대 5% 빠른 것까지) ----------
 
 test("목표 기록: 허용 범위 안이면 목표 기준 페이스", () => {
-  // G1 예측 1:02:33(3753초) → 한계 ceil(3753 × 0.97) = 3641초(1:00:41)
+  // G1 예측 1:02:33(3753초) → 한계 ceil(3753 × 0.95) = 3566초(59:26)
   const p = plan({ target10: 3660 }); // 1:01:00
   assert.equal(p.targetApplied, true);
-  assert.equal(p.targetLimit, 3641);
+  assert.equal(p.targetLimit, 3566);
   assert.deepEqual(p.notes, ["note_target"]);
   assert.equal(formatClock(p.goalTime), "1:01:00");
   assert.equal(formatClock(p.t10), "1:02:33"); // 예측은 그대로
@@ -160,14 +160,16 @@ test("목표 기록: 허용 범위 안이면 목표 기준 페이스", () => {
 });
 
 test("목표 기록: 한계와 같으면 반영", () => {
-  assert.equal(plan({ target10: 3641 }).targetApplied, true);
-  assert.equal(plan({ target10: 3640 }).targetApplied, false);
+  assert.equal(plan({ target10: 3566 }).targetApplied, true);
+  assert.equal(plan({ target10: 3565 }).targetApplied, false);
+  // 이전 기준(3%)에서는 막혔던 1:00:00도 이제 반영
+  assert.equal(plan({ target10: 3600 }).targetApplied, true);
 });
 
 test("목표 기록: 너무 빠르면 예측 기준 + 안내", () => {
-  const p = plan({ target10: 3600 }); // 1:00:00
+  const p = plan({ target10: 3540 }); // 59:00
   assert.equal(p.targetApplied, false);
-  assert.equal(p.target10, 3600);
+  assert.equal(p.target10, 3540);
   assert.deepEqual(p.notes, ["note_targetTooFast"]);
   assert.equal(formatClock(p.goalTime), "1:04:10");
   assert.deepEqual(paceStr(p), { goal: "6:25", easy: "7:15~8:15", tempo: "6:30", interval: "6:00" });

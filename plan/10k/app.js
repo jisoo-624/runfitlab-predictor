@@ -1,6 +1,6 @@
 // 스텝 UI, 상태, 결과 화면 (SPEC 8장)
 import {
-  buildPlan, decodeLink, encodeLink, formatClock, runningGate, safetyGate, t5FromPace,
+  buildPlan, decodeLink, encodeLink, formatClock, formatPace, runningGate, safetyGate, t5FromPace,
 } from "../engine/core.js";
 import { CONFIG } from "../engine/plan-10k.js";
 import { altText, fileName, goalLabel, prepareFonts, renderPlan } from "./render.js";
@@ -275,8 +275,17 @@ const NOTE_TEXT = {
   note_training: () => "평소 페이스 기준이라 실제 실력은 더 빠를 수 있어요. 안전한 쪽으로 계산했어요.",
   note_fast: () => "이 기록이면 완주는 충분해요. 기록 단축 루틴은 곧 공개할게요.",
   note_target: (p) => `목표 기록 ${formatClock(p.target10)}에 맞춰 페이스를 계산했어요.`,
-  note_targetTooFast: (p) => `지금 기록으로 4주 안에 목표(${formatClock(p.target10)})까지 줄이면 무리가 될 수 있어서 예상 기록 기준으로 짰어요. 이번 4주는 ${formatClock(p.targetLimit)}보다 느린 목표를 추천해요.`,
 };
+
+// 눈에 띄게 따로 보여 줄 경고
+const WARNING_TEXT = {
+  note_targetTooFast: (p) => ({
+    title: "목표 기록은 이번 루틴에 반영하지 않았어요",
+    body: `지금 기록으로 4주 안에 목표(${formatClock(p.target10)})까지 줄이면 부상 위험이 커요. 예상 기록(${formatClock(p.goalTime)}) 기준으로 짰어요. 4주 안에 무리 없는 목표는 ${formatClock(p.targetLimit)}부터예요.`,
+  }),
+};
+
+const DAY_LABEL = { sun: "일요일", sat: "토요일" };
 
 async function showResult(input, { navigate = true, replace = false } = {}) {
   const plan = buildPlan(input, CONFIG);
@@ -284,18 +293,33 @@ async function showResult(input, { navigate = true, replace = false } = {}) {
   if (navigate) go("result", { replace, search: `?${encodeLink(input)}` });
   else show("result");
 
+  // 상단 요약
+  $("#result-eyebrow").textContent = `주 ${plan.freq}회 · ${DAY_LABEL[plan.longRunDay]} 롱런`;
+  $("#stat-goal-label").textContent = plan.goalShown ? goalLabel(plan) : "목표";
+  $("#stat-goal").textContent = plan.goalShown ? formatClock(plan.goalTime) : "걷기 섞어 완주";
+  $("#stat-easy").textContent = plan.pace.easy.map(formatPace).join("~");
+  $("#stat-long").textContent = `${plan.weeks[0].cells[6].km}→${plan.weeks[3].cells[6].km}km`;
+
+  const warningKey = plan.notes.find((n) => WARNING_TEXT[n]);
+  $("#result-warning").hidden = !warningKey;
+  if (warningKey) {
+    const w = WARNING_TEXT[warningKey](plan);
+    $("#result-warning-title").textContent = w.title;
+    $("#result-warning-body").textContent = w.body;
+  }
+
   const notes = [
     plan.tier === "gentle" && NOTE_TEXT.gentle(plan),
-    ...plan.notes.map((n) => NOTE_TEXT[n](plan)),
+    ...plan.notes.filter((n) => NOTE_TEXT[n]).map((n) => NOTE_TEXT[n](plan)),
   ].filter(Boolean);
   const notesEl = $("#result-notes");
-  notesEl.innerHTML = notes.map((n) => `<p>${n}</p>`).join("");
+  notesEl.replaceChildren(...notes.map((n) => Object.assign(document.createElement("li"), { textContent: n })));
   notesEl.hidden = notes.length === 0;
 
   $("#howto-mine").textContent = !plan.goalShown
     ? `내 기록 기준: 5km ${formatClock(plan.t5)}. 40분을 넘어서 목표 시간 대신 걷기를 섞어서라도 끝까지 완주하는 걸 목표로 잡았어요.`
     : plan.targetApplied
-      ? `내 기록 기준: 5km ${formatClock(plan.t5)} → 10km 예측 ${formatClock(plan.t10)}. 목표(${formatClock(plan.goalTime)})가 예측보다 3% 이내라서 목표 기준으로 페이스를 계산했어요.`
+      ? `내 기록 기준: 5km ${formatClock(plan.t5)} → 10km 예측 ${formatClock(plan.t10)}. 목표(${formatClock(plan.goalTime)})가 예측보다 5% 이내라서 목표 기준으로 페이스를 계산했어요.`
       : `내 기록 기준: 5km ${formatClock(plan.t5)} → 10km 예측 ${formatClock(plan.t10)}. ${goalLabel(plan)}은 예측보다 1km당 10초 여유를 둔 ${formatClock(plan.goalTime)}이에요.`;
 
   const img = $("#result-img");

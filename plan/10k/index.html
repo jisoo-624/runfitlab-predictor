@@ -163,17 +163,44 @@
 
   <!-- 결과 -->
   <section class="screen" data-screen="result" hidden>
-    <div id="result-notes" class="notes" hidden></div>
+    <div class="result-head">
+      <p class="result-eyebrow" id="result-eyebrow"></p>
+      <h1>4주 루틴이 완성됐어요</h1>
+      <dl class="result-stats">
+        <div class="stat stat-main">
+          <dt id="stat-goal-label"></dt>
+          <dd id="stat-goal"></dd>
+        </div>
+        <div class="stat">
+          <dt>이지런 페이스</dt>
+          <dd id="stat-easy"></dd>
+        </div>
+        <div class="stat">
+          <dt>롱런</dt>
+          <dd id="stat-long"></dd>
+        </div>
+      </dl>
+    </div>
+
+    <div class="alert" id="result-warning" role="alert" hidden>
+      <p class="alert-title" id="result-warning-title"></p>
+      <p class="alert-body" id="result-warning-body"></p>
+    </div>
+
+    <ul class="notes" id="result-notes" hidden></ul>
 
     <figure class="result-figure">
       <div class="result-loading" id="result-loading">이미지를 만드는 중…</div>
       <img id="result-img" alt="" hidden>
+      <figcaption>저장해 두고 4주 동안 이 이미지를 보면서 훈련하세요.</figcaption>
     </figure>
 
-    <p class="save-hint" id="save-hint" hidden>위 이미지를 길게 눌러 저장하세요</p>
+    <div class="save-bar">
+      <button type="button" class="btn btn-primary btn-block" id="save-btn">이미지 저장</button>
+      <p class="save-hint" id="save-hint" hidden><b>이미지를 길게 눌러</b> 저장하세요</p>
+    </div>
 
     <div class="result-actions">
-      <button type="button" class="btn btn-primary" id="save-btn">이미지 저장</button>
       <div class="result-actions-row">
         <button type="button" class="btn btn-ghost" data-restart>다시 만들기</button>
         <button type="button" class="btn btn-ghost" id="copy-btn">링크 복사</button>
@@ -188,7 +215,7 @@
         <ul>
           <li><b>10km 예측</b>: 5km 기록에 Riegel 공식(지수 1.06)을 적용했어요. Daniels VDOT와 비교하면 5km 25~40분 구간에서 차이는 15초 이내예요.</li>
           <li><b>세션 페이스</b>: 이지런·롱런은 10km 예측 페이스 + 60~120초, 템포런은 + 15초, 인터벌은 5km 페이스예요. 5km 30:00 기준 이지런 7:15~8:15, 템포런 6:30, 인터벌 6:00으로 Daniels 범위와 비슷하고, 인터벌은 입문자용으로 조금 보수적으로 잡았어요.</li>
-          <li><b>목표 기록</b>: 목표를 넣으면 예측보다 최대 3% 빠른 목표까지는 그 목표를 기준으로 모든 페이스를 다시 계산해요. 그보다 빠르면 4주 안에는 무리라고 보고 예측 기준으로 짜요.</li>
+          <li><b>목표 기록</b>: 목표를 넣으면 예측보다 최대 5% 빠른 목표까지는 그 목표를 기준으로 모든 페이스를 다시 계산해요. 그보다 빠르면 4주 안에는 무리라고 보고 예측 기준으로 짜요.</li>
           <li><b>볼륨</b>: 1주차는 지금 주간 거리의 1.3배 이내, 이후 주간 증가는 15% 이내로 맞췄어요. 입증된 규칙이라기보다 안전 마진이에요.</li>
           <li><b>마지막 주</b>: 4주차는 마지막 롱런 10km를 빼면 3주차 거리의 22~49%만 달려요. 거리는 줄여 다리를 쉬게 하고, 가속주로 감각은 유지한 뒤 10km를 이지런 페이스로 끝까지 달려요.</li>
           <li><b>런-워크</b>: 5km가 40분을 넘으면 예측 공식이 잘 맞지 않아서, 목표 시간 대신 달리기와 걷기를 섞어 끝까지 완주하는 걸 목표로 잡아요.</li>
