@@ -5,7 +5,7 @@ import {
 import { CONFIG } from "../engine/plan-10k.js";
 import { altText, fileName, prepareFonts, renderPlan } from "./render.js";
 
-const YOUTUBE_URL = "";
+const YOUTUBE_URL = "https://www.youtube.com/@runfitlab";
 const IN_APP = /Instagram|FBAN|FBAV|KAKAOTALK/i.test(navigator.userAgent);
 const STEPS = ["step1", "step2", "step3", "step4"];
 
