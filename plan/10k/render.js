@@ -110,11 +110,16 @@ export function layout(plan, measure, opts = {}) {
     text("goalRunWalk", [{ text: "걷기를 섞어도 끝까지 완주", color: C.orange }], { x: L, y: 515, weight: 800, size: 64, minSize: 44, maxWidth: CONTENT_W });
   }
 
-  // ③ 페이스 (540~680)
+  // ③ 페이스 (540~680). 루틴에 등장한 세션의 페이스만 보여준다.
   const easyRange = plan.pace.easy.map(formatPace).join("~");
+  const guideKeys = new Set(plan.guide.map((g) => g.key));
   const paceBoxes = plan.runWalk
     ? [["이지·롱런", easyRange], ["런-워크", "달리기 4분·걷기 1분"]]
-    : [["이지·롱런", easyRange], ["템포", formatPace(plan.pace.tempo)], ["인터벌", formatPace(plan.pace.interval)]];
+    : [
+      ["이지·롱런", easyRange],
+      guideKeys.has("tempo") && ["템포", formatPace(plan.pace.tempo)],
+      guideKeys.has("interval") && ["인터벌", formatPace(plan.pace.interval)],
+    ].filter(Boolean);
   const boxGap = 12;
   const boxW = (CONTENT_W - boxGap * (paceBoxes.length - 1)) / paceBoxes.length;
   paceBoxes.forEach(([label, value], i) => {
