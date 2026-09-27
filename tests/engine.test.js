@@ -104,6 +104,9 @@ test("G7: gate_pain", () => assert.deepEqual(plan({ pain: true }), { type: "gate
 test("G8: gate_notRunning", () =>
   assert.deepEqual(plan({ recentFreq: 0, recentKm: "3to5" }), { type: "gate_notRunning" }));
 
+test("최근 0회면 1회 거리가 없어도 gate_notRunning", () =>
+  assert.deepEqual(plan({ recentFreq: 0, recentKm: null }), { type: "gate_notRunning" }));
+
 test("G9: 토요일 앵커", () => {
   const p = plan({ recentFreq: 2, freq: 2, longRunDay: "sat" });
   assert.equal(p.tier, "basic");

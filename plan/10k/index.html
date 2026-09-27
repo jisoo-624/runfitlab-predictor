@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>10km 완주 4주 루틴 만들기 · 런핏랩</title>
+<meta name="description" content="5km 기록과 지금 달리는 양을 넣으면 4주 10km 완주 루틴을 이미지 한 장으로 만들어 드려요.">
+<meta name="theme-color" content="#F3F4F2">
+<meta property="og:type" content="website">
+<meta property="og:title" content="10km 완주 4주 루틴 만들기 · 런핏랩">
+<meta property="og:description" content="4가지만 답하면 내 기록에 맞춘 4주 루틴 이미지를 만들어 드려요.">
+<meta property="og:url" content="https://jisoo-624.github.io/runfitlab-predictor/plan/10k/">
+<meta property="og:image" content="https://jisoo-624.github.io/runfitlab-predictor/plan/10k/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://jisoo-624.github.io/runfitlab-predictor/plan/10k/og.png">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="style.css">
+<script type="module" src="app.js"></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <span class="dot" aria-hidden="true"></span><strong>런핏랩</strong><span class="topbar-sep" aria-hidden="true">·</span><span>10km 완주 4주 루틴 만들기</span>
+  </div>
+</header>
+
+<main class="page">
+
+  <!-- 스텝 1: 안전 체크 -->
+  <section class="screen" data-screen="step1" hidden>
+    <p class="progress">1 / 4</p>
+    <h1>먼저 안전부터 확인할게요</h1>
+    <p class="lead">4가지만 답하면 나만의 훈련 루틴을 만들어 드려요.</p>
+
+    <fieldset class="field">
+      <legend>5km를 쉬지 않고 달릴 수 있나요?</legend>
+      <p class="help">신호 대기나 물 마시려고 잠깐 선 건 괜찮아요. 걷는 구간 없이 달리기만으로 5km를 채울 수 있으면 "네"를 골라 주세요.</p>
+      <div class="chips">
+        <label class="chip"><input type="radio" name="continuous5k" value="yes"><span>네</span></label>
+        <label class="chip"><input type="radio" name="continuous5k" value="no"><span>아니요</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend>지금 달릴 때 아픈 곳이 있나요?</legend>
+      <div class="chips">
+        <label class="chip"><input type="radio" name="pain" value="no"><span>없어요</span></label>
+        <label class="chip"><input type="radio" name="pain" value="yes"><span>있어요</span></label>
+      </div>
+    </fieldset>
+
+    <div class="actions">
+      <button type="button" class="btn btn-primary" data-next="step1" disabled>다음</button>
+    </div>
+  </section>
+
+  <!-- 스텝 2: 5km 기록 -->
+  <section class="screen" data-screen="step2" hidden>
+    <p class="progress">2 / 4</p>
+    <h1 id="t5-title">최근 5km 기록</h1>
+    <p class="lead" id="t5-lead">대회가 아니어도 괜찮아요. 최근에 5km를 달린 시간을 넣어 주세요.</p>
+
+    <div class="time-field" role="group" aria-labelledby="t5-title">
+      <input type="text" id="time-m" class="time-input" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="30" aria-label="분">
+      <span class="time-colon" aria-hidden="true">:</span>
+      <input type="text" id="time-s" class="time-input" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="00" aria-label="초">
+      <span class="time-unit" id="time-unit" hidden>/km</span>
+    </div>
+    <p class="time-hint" id="time-hint">분 : 초</p>
+    <p class="error" id="time-error" role="alert" hidden></p>
+
+    <button type="button" class="link-btn" id="mode-toggle">기록을 몰라요 → 평소 1km 페이스로 입력</button>
+
+    <div class="actions">
+      <button type="button" class="btn btn-ghost" data-back>이전</button>
+      <button type="button" class="btn btn-primary" data-next="step2" disabled>다음</button>
+    </div>
+  </section>
+
+  <!-- 스텝 3: 최근 한 달 -->
+  <section class="screen" data-screen="step3" hidden>
+    <p class="progress">3 / 4</p>
+    <h1>최근 한 달 동안</h1>
+
+    <fieldset class="field">
+      <legend>보통 주 몇 번 달렸나요?</legend>
+      <div class="chips chips-6">
+        <label class="chip"><input type="radio" name="recentFreq" value="0"><span>0회</span></label>
+        <label class="chip"><input type="radio" name="recentFreq" value="1"><span>1회</span></label>
+        <label class="chip"><input type="radio" name="recentFreq" value="2"><span>2회</span></label>
+        <label class="chip"><input type="radio" name="recentFreq" value="3"><span>3회</span></label>
+        <label class="chip"><input type="radio" name="recentFreq" value="4"><span>4회</span></label>
+        <label class="chip"><input type="radio" name="recentFreq" value="5"><span>5회+</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="field" id="recent-km-field">
+      <legend>한 번에 보통 몇 km 달렸나요?</legend>
+      <div class="chips chips-2x2">
+        <label class="chip"><input type="radio" name="recentKm" value="lt3"><span>3km 미만</span></label>
+        <label class="chip"><input type="radio" name="recentKm" value="3to5"><span>3~5km</span></label>
+        <label class="chip"><input type="radio" name="recentKm" value="5to7"><span>5~7km</span></label>
+        <label class="chip"><input type="radio" name="recentKm" value="gt7"><span>7km 이상</span></label>
+      </div>
+    </fieldset>
+
+    <div class="actions">
+      <button type="button" class="btn btn-ghost" data-back>이전</button>
+      <button type="button" class="btn btn-primary" data-next="step3" disabled>다음</button>
+    </div>
+  </section>
+
+  <!-- 스텝 4: 앞으로 4주 -->
+  <section class="screen" data-screen="step4" hidden>
+    <p class="progress">4 / 4</p>
+    <h1>앞으로 4주</h1>
+
+    <fieldset class="field">
+      <legend>주 몇 번 달릴 수 있나요?</legend>
+      <div class="chips chips-4">
+        <label class="chip"><input type="radio" name="freq" value="2"><span>2회</span></label>
+        <label class="chip"><input type="radio" name="freq" value="3"><span>3회</span></label>
+        <label class="chip"><input type="radio" name="freq" value="4"><span>4회</span></label>
+        <label class="chip"><input type="radio" name="freq" value="5"><span>5회</span></label>
+      </div>
+    </fieldset>
+
+    <fieldset class="field">
+      <legend>롱런과 10km 도전은 무슨 요일이 편한가요?</legend>
+      <div class="chips">
+        <label class="chip"><input type="radio" name="longRunDay" value="sat"><span>토요일</span></label>
+        <label class="chip"><input type="radio" name="longRunDay" value="sun" checked><span>일요일</span></label>
+      </div>
+    </fieldset>
+
+    <div class="actions">
+      <button type="button" class="btn btn-ghost" data-back>이전</button>
+      <button type="button" class="btn btn-primary" data-next="step4" disabled>루틴 만들기</button>
+    </div>
+  </section>
+
+  <!-- 게이트 -->
+  <section class="screen" data-screen="gate" hidden>
+    <h1 id="gate-title"></h1>
+    <div id="gate-body" class="gate-body"></div>
+    <div class="actions">
+      <button type="button" class="btn btn-primary" data-restart>처음부터 다시</button>
+    </div>
+  </section>
+
+  <!-- 결과 -->
+  <section class="screen" data-screen="result" hidden>
+    <div id="result-notes" class="notes" hidden></div>
+
+    <figure class="result-figure">
+      <div class="result-loading" id="result-loading">이미지를 만드는 중…</div>
+      <img id="result-img" alt="" hidden>
+    </figure>
+
+    <p class="save-hint" id="save-hint" hidden>위 이미지를 길게 눌러 저장하세요</p>
+
+    <div class="result-actions">
+      <button type="button" class="btn btn-primary" id="save-btn">이미지 저장</button>
+      <div class="result-actions-row">
+        <button type="button" class="btn btn-ghost" data-restart>다시 만들기</button>
+        <button type="button" class="btn btn-ghost" id="copy-btn">링크 복사</button>
+      </div>
+      <p class="toast" id="copy-toast" role="status" aria-live="polite"></p>
+    </div>
+
+    <details class="howto">
+      <summary>어떻게 계산했나요</summary>
+      <div class="howto-body">
+        <p id="howto-mine"></p>
+        <ul>
+          <li><b>10km 예측</b>: 5km 기록에 Riegel 공식(지수 1.06)을 적용했어요. Daniels VDOT와 비교하면 5km 25~40분 구간에서 차이는 15초 이내예요.</li>
+          <li><b>세션 페이스</b>: 이지·롱런은 10km 예측 페이스 + 60~120초, 템포는 + 15초, 인터벌은 5km 페이스예요. 5km 30:00 기준 이지 7:15~8:15, 템포 6:30, 인터벌 6:00으로 Daniels 범위와 비슷하고, 인터벌은 입문자용으로 조금 보수적으로 잡았어요.</li>
+          <li><b>볼륨</b>: 1주차는 지금 주간 거리의 1.3배 이내, 이후 주간 증가는 15% 이내로 맞췄어요. 입증된 규칙이라기보다 안전 마진이에요.</li>
+          <li><b>테이퍼</b>: 4주차는 레이스를 빼면 3주차 거리의 22~49%만 달려요. 거리는 크게 줄이고 가속주로 다리 감각은 유지해요.</li>
+          <li><b>런-워크</b>: 5km가 40분을 넘으면 예측 공식이 잘 맞지 않아서, 목표 시간 대신 달리기와 걷기를 섞어 끝까지 완주하는 걸 목표로 잡아요.</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p class="disclaimer">의료 조언이 아닌 일반 훈련 가이드예요. 통증이 있으면 쉬고, 이어지면 진료를 받아 보세요.</p>
+  <p>입력한 기록은 저장되거나 전송되지 않아요.</p>
+  <p class="footer-links">
+    <a href="https://www.instagram.com/runfit_lab/" target="_blank" rel="noopener">인스타그램 @runfit_lab</a>
+    <a id="youtube-link" href="#" target="_blank" rel="noopener" hidden>유튜브</a>
+    <a href="../../">레이스 기록 예측기</a>
+  </p>
+</footer>
+
+</body>
+</html>

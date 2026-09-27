@@ -1,0 +1,413 @@
+:root {
+  --paper: #F3F4F2;
+  --ink: #23262B;
+  --orange: #FF5A1F;
+  --mute: #6B6F76;
+  --line: #D5D7D3;
+  --white: #FFFFFF;
+  --topbar-h: 52px;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+[hidden] { display: none !important; }
+
+/* ---------- 상단 고정 헤더 ---------- */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+
+.topbar-inner {
+  max-width: 680px;
+  margin: 0 auto;
+  height: var(--topbar-h);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.topbar-inner span:last-child { overflow: hidden; text-overflow: ellipsis; }
+.topbar-sep { color: var(--mute); }
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--orange);
+  flex: none;
+}
+
+/* ---------- 페이지 ---------- */
+
+.page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 20px 16px 32px;
+}
+
+.progress {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mute);
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  line-height: 1.3;
+  font-weight: 800;
+}
+
+h1:focus { outline: none; }
+
+.lead {
+  margin: 0 0 24px;
+  color: var(--mute);
+}
+
+/* ---------- 칩 (라디오 그룹) ---------- */
+
+.field {
+  margin: 0 0 28px;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.field legend {
+  padding: 0;
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.help {
+  margin: -4px 0 12px;
+  font-size: 14px;
+  color: var(--mute);
+}
+
+.field.is-disabled { opacity: 0.4; }
+
+.chips {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.chips-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.chips-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+
+.chip { position: relative; display: block; }
+
+.chip input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.chip span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 8px 4px;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--white);
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.chip input:checked + span {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--white);
+}
+
+.chip input:focus-visible + span {
+  outline: 3px solid var(--orange);
+  outline-offset: 2px;
+}
+
+.chip input:disabled + span { cursor: default; }
+
+@media (max-width: 360px) {
+  .chips-6 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* ---------- 5km 기록 입력 ---------- */
+
+.time-field {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.time-input {
+  width: 112px;
+  min-width: 0;
+  height: 88px;
+  padding: 0;
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  background: var(--white);
+  color: var(--ink);
+  font: inherit;
+  font-size: 48px;
+  font-weight: 800;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.time-input::placeholder { color: #C3C6C1; }
+
+.time-input:focus {
+  outline: none;
+  border-color: var(--orange);
+}
+
+.time-colon {
+  font-size: 44px;
+  font-weight: 800;
+}
+
+.time-unit {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--mute);
+}
+
+.time-hint {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--mute);
+}
+
+.error {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #C73A0B;
+}
+
+.link-btn {
+  display: block;
+  margin: 20px auto 0;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* ---------- 버튼 ---------- */
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 32px;
+}
+
+.actions .btn-primary { flex: 1; }
+
+.btn {
+  min-height: 52px;
+  padding: 0 20px;
+  border-radius: 12px;
+  border: 1.5px solid transparent;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn:focus-visible,
+.link-btn:focus-visible,
+.footer a:focus-visible,
+.howto summary:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: var(--orange);
+  color: var(--white);
+}
+
+.btn-primary:disabled {
+  background: var(--line);
+  color: var(--mute);
+  cursor: default;
+}
+
+.btn-ghost {
+  background: var(--white);
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+/* ---------- 게이트 ---------- */
+
+.gate-body p { margin: 0 0 12px; }
+
+.gate-body ol {
+  margin: 0 0 16px;
+  padding-left: 22px;
+}
+
+.gate-body li { margin-bottom: 6px; }
+
+/* ---------- 결과 ---------- */
+
+.notes {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-left: 4px solid var(--orange);
+  background: var(--white);
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.notes p { margin: 0; }
+.notes p + p { margin-top: 6px; }
+
+.result-figure { margin: 0; }
+
+.result-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(35, 38, 43, 0.18);
+  -webkit-touch-callout: default;
+}
+
+.result-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 9 / 16;
+  border-radius: 12px;
+  background: var(--ink);
+  color: #B5B8BE;
+}
+
+.save-hint {
+  margin: 16px 0 0;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--ink);
+  color: var(--white);
+  text-align: center;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.result-actions {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.result-actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.toast {
+  min-height: 22px;
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--mute);
+  word-break: break-all;
+}
+
+.howto {
+  margin-top: 24px;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.howto summary {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.howto-body {
+  padding-bottom: 12px;
+  font-size: 14px;
+  color: #3D4147;
+}
+
+.howto-body ul { margin: 0; padding-left: 18px; }
+.howto-body li { margin-bottom: 8px; }
+
+/* ---------- 푸터 ---------- */
+
+.footer {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 8px 16px 40px;
+  font-size: 13px;
+  color: var(--mute);
+}
+
+.footer p { margin: 0 0 6px; }
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 10px !important;
+}
+
+.footer a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ink);
+  font-weight: 700;
+}

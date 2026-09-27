@@ -177,10 +177,11 @@ function buildGuide(weeks, runWalk, pace, config) {
 export function buildPlan(input, config) {
   const safety = safetyGate(input);
   if (safety) return safety;
-  const errors = validateInput(input, config);
-  if (errors.length) throw new RangeError(`invalid input: ${errors.join(", ")}`);
+  // 최근 0회면 1회 거리는 묻지 않으므로 검증보다 먼저 판정한다
   const running = runningGate(input);
   if (running) return running;
+  const errors = validateInput(input, config);
+  if (errors.length) throw new RangeError(`invalid input: ${errors.join(", ")}`);
 
   const sel = selectTier(input, config);
   if (!sel.tier) return { type: "gate_volume", B: sel.B };
