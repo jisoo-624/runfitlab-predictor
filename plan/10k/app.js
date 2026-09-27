@@ -285,7 +285,6 @@ const WARNING_TEXT = {
   }),
 };
 
-const DAY_LABEL = { sun: "일요일", sat: "토요일" };
 
 async function showResult(input, { navigate = true, replace = false } = {}) {
   const plan = buildPlan(input, CONFIG);
@@ -293,8 +292,6 @@ async function showResult(input, { navigate = true, replace = false } = {}) {
   if (navigate) go("result", { replace, search: `?${encodeLink(input)}` });
   else show("result");
 
-  // 상단 요약
-  $("#result-eyebrow").textContent = `주 ${plan.freq}회 · ${DAY_LABEL[plan.longRunDay]} 롱런`;
 
   const warningKey = plan.notes.find((n) => WARNING_TEXT[n]);
   $("#result-warning").hidden = !warningKey;

@@ -381,13 +381,6 @@ h1:focus { outline: none; }
 
 .result-head { margin-bottom: 16px; }
 
-.result-eyebrow {
-  margin: 0 0 4px;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--orange);
-}
-
 .result-head h1 { margin-bottom: 0; }
 
 /* 목표 기록 무리 등 꼭 읽어야 하는 경고 */
@@ -547,7 +540,25 @@ h1:focus { outline: none; }
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
+  list-style: none;
 }
+
+.howto summary::-webkit-details-marker { display: none; }
+
+/* 펼칠 수 있다는 표시 / 펼친 뒤 접을 수 있다는 표시 */
+.howto summary::after {
+  content: "펼치기 ▾";
+  margin-left: auto;
+  padding-left: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--orange);
+  white-space: nowrap;
+}
+
+.howto[open] summary::after { content: "접기 ▴"; }
+
+.howto[open] summary { border-bottom: 1px solid var(--line); margin-bottom: 12px; }
 
 .howto-body {
   padding-bottom: 16px;

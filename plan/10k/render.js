@@ -99,7 +99,7 @@ export function layout(plan, measure, opts = {}) {
     const paceFont = (px) => `700 ${px}px ${family}`;
     const paceW = measure(paceFont(52), pace);
     const gap = 28;
-    text("goalTime", [{ text: formatClock(plan.goalTime), color: C.orange }], { x: L, y: 500, weight: 800, size: 124, minSize: 88, maxWidth: CONTENT_W - paceW - gap });
+    text("goalTime", [{ text: formatClock(plan.goalTime), color: C.orange }], { x: L, y: 500, weight: 800, size: 96, minSize: 72, maxWidth: CONTENT_W - paceW - gap });
     const timeOp = ops.filter((o) => o.id === "goalTime").at(-1);
     const timeEnd = timeOp.x + measure(timeOp.font, timeOp.text);
     text("goalPace", [{ text: pace, color: C.white }], { x: timeEnd + gap, y: 500, weight: 700, size: 52, minSize: 40, maxWidth: R - timeEnd - gap });
@@ -151,8 +151,8 @@ export function layout(plan, measure, opts = {}) {
       let subColor = C.sub;
       if (cell.kind === "easy") rect(x, y, CAL.colW, CAL.rowH, 12, { fill: C.easyFill });
       else if (cell.kind === "quality") { rect(x, y, CAL.colW, CAL.rowH, 12, { fill: C.white }); fg = C.charcoal; subColor = "#5C6068"; }
-      else if (cell.kind === "long") rect(x + 1, y + 1, CAL.colW - 2, CAL.rowH - 2, 12, { stroke: C.orange, lineWidth: 2 });
-      else if (cell.kind === "final") { rect(x, y, CAL.colW, CAL.rowH, 12, { fill: C.orange }); subColor = C.white; }
+      // 마지막 롱런도 다른 롱런과 같은 모양
+      else if (cell.kind === "long" || cell.kind === "final") rect(x + 1, y + 1, CAL.colW - 2, CAL.rowH - 2, 12, { stroke: C.orange, lineWidth: 2 });
 
       const cx = x + CAL.colW / 2;
       const maxW = CAL.colW - CAL.cellPad * 2;
