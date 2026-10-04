@@ -17,6 +17,7 @@ const C = {
   easyFill: "#34373D",
   charcoal: "#23262B",
   restLine: "#3A3D43",
+  white90: "rgba(255, 255, 255, 0.9)",  // 주황 칸 보조 글씨 (불투명도 90%)
   intervalFill: "#FFFFFF",  // 인터벌: 흰색
   tempoFill: "#8EC5FF",     // 템포런: 하늘색
   sharpenFill: "#B8E986",   // 가속주: 연두색
@@ -175,15 +176,23 @@ export function layout(plan, measure, opts = {}) {
       if (cell.kind === "easy") rect(x, y, CAL.colW, CAL.rowH, 12, { fill: C.easyFill });
       else if (cell.kind === "quality") { rect(x, y, CAL.colW, CAL.rowH, 12, { fill: qualityFill(cell.sessionId) }); fg = C.charcoal; subColor = "#5C6068"; }
       // 마지막 롱런도 다른 롱런과 같은 모양
-      else if (cell.kind === "long" || cell.kind === "final") rect(x + 1, y + 1, CAL.colW - 2, CAL.rowH - 2, 12, { stroke: C.orange, lineWidth: 2 });
+      else if (cell.kind === "long") rect(x + 1, y + 1, CAL.colW - 2, CAL.rowH - 2, 12, { stroke: C.orange, lineWidth: 2 });
+      // 마지막 주 도전 칸: 브랜드 주황 채움. 보조 글씨는 목표 페이스 (런-워크면 cellSub 그대로)
+      else if (cell.kind === "final") {
+        rect(x, y, CAL.colW, CAL.rowH, 12, { fill: C.orange });
+        subColor = C.white90;
+      }
+
+      let sub = cell.cellSub;
+      if (cell.kind === "final" && !plan.runWalk) sub = `목표 ${formatPace(plan.pace.goal)}`;
 
       const cx = x + CAL.colW / 2;
       const maxW = CAL.colW - CAL.cellPad * 2;
-      const top = cell.cellSub ? y + 46 : y + 62;
+      const top = sub ? y + 46 : y + 62;
       text(`${id}.label`, [{ text: cell.cellLabel, color: fg }], { x: cx, y: top, weight: 800, size: 30, minSize: 26, maxWidth: maxW, align: "center" });
       text(`${id}.km`, [{ text: `${cell.km}km`, color: fg }], { x: cx, y: top + 40, weight: 700, size: 30, minSize: 26, maxWidth: maxW, align: "center" });
-      if (cell.cellSub) {
-        text(`${id}.sub`, [{ text: cell.cellSub, color: subColor }], { x: cx, y: top + 80, weight: 400, size: 22, minSize: 20, maxWidth: maxW, align: "center" });
+      if (sub) {
+        text(`${id}.sub`, [{ text: sub, color: subColor }], { x: cx, y: top + 80, weight: 400, size: 22, minSize: 20, maxWidth: maxW, align: "center" });
       }
     });
   });
