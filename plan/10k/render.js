@@ -1,7 +1,7 @@
 // 4주 루틴 이미지 (SPEC 7장), 5km 연속 달리기 만들기 이미지
 // layout(plan, measure, opts): 그리기 목록 + overflow 목록을 반환. 글자 폭 측정은 주입받는다.
 // draw(ctx, layout): 목록대로 canvas에 그린다.
-import { formatClock, formatPace } from "../engine/core.js";
+import { formatClock, formatPace, sharpenRange } from "../engine/core.js";
 
 export const WIDTH = 1080;
 export const HEIGHT = 1920;
@@ -135,21 +135,30 @@ export function layout(plan, measure, opts = {}) {
   // ③ 페이스 (540~680). 루틴에 등장한 세션의 페이스만 보여준다.
   const easyRange = `${plan.pace.easy.map(formatPace).join("~")}/km`;
   const guideKeys = new Set(plan.guide.map((g) => g.key));
+  const sharpenValue = `${sharpenRange(plan.pace).map(formatPace).join("~")}/km`;
   const paceBoxes = plan.runWalk
-    ? [["이지런·롱런", easyRange], ["런-워크", "달리기 4분·걷기 1분"]]
+    ? [["이지런·롱런", easyRange], ["런-워크", "달리기 4분·걷기 1분"], guideKeys.has("sharpen") && ["가속주", sharpenValue]]
     : [
       ["이지런·롱런", easyRange],
       guideKeys.has("tempo") && ["템포런", `${formatPace(plan.pace.tempo)}/km`],
       guideKeys.has("interval") && ["인터벌", `${formatPace(plan.pace.interval)}/km`],
+      guideKeys.has("sharpen") && ["가속주", sharpenValue],
     ].filter(Boolean);
   const boxGap = 12;
   const boxW = (CONTENT_W - boxGap * (paceBoxes.length - 1)) / paceBoxes.length;
+  // 값 글자 크기는 카드 전체가 같게: 가장 긴 값이 들어가는 최대 크기 (40 → 최소 26)
+  const fitPx = (value) => {
+    let px = 40;
+    while (px > 26 && measure(`800 ${px}px ${family}`, value) > boxW - 20) px--;
+    return px;
+  };
+  const valuePx = Math.min(...paceBoxes.map(([, value]) => fitPx(value)));
   paceBoxes.forEach(([label, value], i) => {
     const x = L + i * (boxW + boxGap);
     rect(x, 540, boxW, 128, 16, { fill: C.easyFill });
     rect(x + boxW / 2 - 24, 552, 48, 5, 2.5, { fill: C.orange });
     text(`paceLabel${i}`, [{ text: label, color: C.white }], { x: x + boxW / 2, y: 598, weight: 700, size: 26, minSize: 20, maxWidth: boxW - 24, align: "center" });
-    text(`paceValue${i}`, [{ text: value, color: C.white }], { x: x + boxW / 2, y: 648, weight: 800, size: 40, minSize: 26, maxWidth: boxW - 20, align: "center" });
+    text(`paceValue${i}`, [{ text: value, color: C.white }], { x: x + boxW / 2, y: 648, weight: 800, size: valuePx, minSize: valuePx, maxWidth: boxW - 20, align: "center" });
   });
 
   // ④ 캘린더 (680~1400)

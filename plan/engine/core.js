@@ -166,6 +166,11 @@ function buildWeeks(tier, freq, runWalk, config) {
   });
 }
 
+// 가속주 페이스 범위: 5km 페이스(인터벌 페이스) −30초 ~ −10초. 카드와 계산 결과에서 같이 쓴다
+export function sharpenRange(pace) {
+  return [pace.interval - 30, pace.interval - 10];
+}
+
 // ---------- 세션 가이드 (5.7, 7.4) ----------
 
 export function guideKeyOf(cell, runWalk, config) {
@@ -185,9 +190,7 @@ function buildGuide(weeks, runWalk, pace, config) {
       .replace("{interval}", formatPace(pace.interval))
       .replace("{tempo}", formatPace(pace.tempo))
       .replace("{raceLo}", formatPace(pace.goal + 5))
-      .replace("{raceHi}", formatPace(pace.goal + 10))
-      .replace("{sharpenLo}", formatPace(pace.interval - 30))
-      .replace("{sharpenHi}", formatPace(pace.interval - 10));
+      .replace("{raceHi}", formatPace(pace.goal + 10));
     return { key, text };
   });
 }
