@@ -82,16 +82,16 @@ const SESSIONS = {
     parts: [["워밍업", 1.5], ["템포", 2.5], ["쿨다운", 1]],
   },
   sharpen: { kind: "quality", cellLabel: "가속주", cellSub: "100m×4", pace: "easy", guideKey: "sharpen" },
-  final: { kind: "final", cellLabel: "롱런", cellSub: null, pace: "easy" },
+  final: { kind: "final", cellLabel: "도전", cellSub: null, pace: "easy" },
 };
 
 const GUIDE_TEXT = {
   easy: "이지런·롱런: 대화가 가능한 속도. 느려도 그대로",
   interval: "인터벌: 워밍업 1km → 400m를 {interval}/km로, 사이 200m 천천히 조깅 → 쿨다운",
   tempo: "템포런: 워밍업 1~1.5km → {tempo}/km로 2~2.5km 유지 → 쿨다운 1km",
-  sharpen: "가속주: 이지런 2km 뒤 100m 가속주 4회. 다리만 깨우는 날",
+  sharpen: "가속주: 이지런 2km → 100m 가속주 4회(사이 100m 조깅) → 쿨다운. 다리만 깨우는 날",
   runwalk: "런-워크: 달리기 4분 + 걷기 1분 반복. 숨이 편한 속도로",
-  final: "마지막 롱런: 10km를 이지런 페이스로. 걷지 않고 끝까지 가면 완주예요",
+  final: "10km 도전: 첫 3km는 {raceLo}~{raceHi}/km로 천천히, 후반에 여유 있으면 올리기",
   final_runwalk: "마지막 롱런: 달리기 4분 + 걷기 1분 리듬으로 10km 끝까지",
 };
 

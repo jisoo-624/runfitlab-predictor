@@ -1,4 +1,4 @@
-// 렌더 검수 (SPEC 11.4, 개발 전용): 루틴 39장 + 5km 무정지 만들기 1장 이미지 → reports/images/, 컨택트 시트 → reports/contact-sheet.png
+// 렌더 검수 (SPEC 11.4, 개발 전용): 루틴 39장 + 5km 연속 달리기 만들기 1장 이미지 → reports/images/, 컨택트 시트 → reports/contact-sheet.png
 // 실행: node scripts/render-matrix.mjs
 // 브라우저: Playwright chromium(npx playwright install chromium). 없으면 설치된 Edge/Chrome을 쓴다.
 // overflow가 1개라도 있으면 exit 1. 폰트 로드 실패(시스템 폰트) 상황의 넘침도 함께 검사한다 (7.1).

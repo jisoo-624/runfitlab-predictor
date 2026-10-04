@@ -183,7 +183,9 @@ function buildGuide(weeks, runWalk, pace, config) {
     const key = runWalk ? RUN_WALK_GUIDE[k] ?? k : k;
     const text = config.guideText[key]
       .replace("{interval}", formatPace(pace.interval))
-      .replace("{tempo}", formatPace(pace.tempo));
+      .replace("{tempo}", formatPace(pace.tempo))
+      .replace("{raceLo}", formatPace(pace.goal + 5))
+      .replace("{raceHi}", formatPace(pace.goal + 10));
     return { key, text };
   });
 }

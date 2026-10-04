@@ -47,7 +47,7 @@ test("G1 캘린더", () => {
     "1주 16km : · 이지런5 · 인터벌5(400m×5) · · 롱런6",
     "2주 17.5km : · 이지런5 · 템포런5(2.5km) · · 롱런7.5",
     "3주 18.5km : · 이지런5 · 인터벌5(400m×6) · · 롱런8.5",
-    "4주 17km : · 이지런4 · 가속주3(100m×4) · · 롱런10",
+    "4주 17km : · 이지런4 · 가속주3(100m×4) · · 도전10",
   ]);
   assert.deepEqual(p.weeks[0].cells.map((c) => c?.kind ?? null), [null, "easy", null, "quality", null, null, "long"]);
   assert.equal(p.weeks[3].cells[6].kind, "final");
@@ -86,7 +86,7 @@ test("G4: 42:00 런-워크", () => {
   assert.equal(p.weeks[0].cells[1].cellLabel, "런-워크");
   assert.equal(p.weeks[0].cells[1].kind, "easy");
   assert.deepEqual(p.weeks[0].cells[6], { kind: "long", sessionId: "long", cellLabel: "롱런", cellSub: "런-워크", km: 6 });
-  assert.deepEqual(p.weeks[3].cells[6], { kind: "final", sessionId: "final", cellLabel: "롱런", cellSub: "런-워크", km: 10 });
+  assert.deepEqual(p.weeks[3].cells[6], { kind: "final", sessionId: "final", cellLabel: "도전", cellSub: "런-워크", km: 10 });
   assert.deepEqual(p.guide.map((g) => g.key), ["runwalk", "sharpen", "final_runwalk"]);
 });
 

@@ -1,4 +1,4 @@
-// 4주 루틴 이미지 (SPEC 7장), 5km 무정지 만들기 이미지
+// 4주 루틴 이미지 (SPEC 7장), 5km 연속 달리기 만들기 이미지
 // layout(plan, measure, opts): 그리기 목록 + overflow 목록을 반환. 글자 폭 측정은 주입받는다.
 // draw(ctx, layout): 목록대로 canvas에 그린다.
 import { formatClock, formatPace } from "../engine/core.js";
@@ -17,7 +17,17 @@ const C = {
   easyFill: "#34373D",
   charcoal: "#23262B",
   restLine: "#3A3D43",
+  intervalFill: "#FFFFFF",  // 인터벌: 흰색
+  tempoFill: "#8EC5FF",     // 템포런: 하늘색
+  sharpenFill: "#B8E986",   // 가속주: 연두색
 };
+
+// quality 칸은 sessionId로 색을 나눈다 (인터벌 / 템포런 / 가속주)
+function qualityFill(sessionId) {
+  if (sessionId.startsWith("int")) return C.intervalFill;
+  if (sessionId.startsWith("tempo")) return C.tempoFill;
+  return C.sharpenFill;
+}
 
 const L = 60;
 const R = WIDTH - 60;
@@ -48,7 +58,7 @@ export function altText(plan) {
 }
 
 export function goalLabel(plan) {
-  return plan.targetApplied ? "10km 목표 기록" : "10km 예상 기록";
+  return "10km 목표 기록";
 }
 
 // ---------- 공통: 글자 맞춤 + 그리기 목록 ----------
@@ -163,7 +173,7 @@ export function layout(plan, measure, opts = {}) {
       let fg = C.white;
       let subColor = C.sub;
       if (cell.kind === "easy") rect(x, y, CAL.colW, CAL.rowH, 12, { fill: C.easyFill });
-      else if (cell.kind === "quality") { rect(x, y, CAL.colW, CAL.rowH, 12, { fill: C.white }); fg = C.charcoal; subColor = "#5C6068"; }
+      else if (cell.kind === "quality") { rect(x, y, CAL.colW, CAL.rowH, 12, { fill: qualityFill(cell.sessionId) }); fg = C.charcoal; subColor = "#5C6068"; }
       // 마지막 롱런도 다른 롱런과 같은 모양
       else if (cell.kind === "long" || cell.kind === "final") rect(x + 1, y + 1, CAL.colW - 2, CAL.rowH - 2, 12, { stroke: C.orange, lineWidth: 2 });
 
@@ -201,10 +211,10 @@ export function layout(plan, measure, opts = {}) {
   return result();
 }
 
-// ---------- 5km 무정지 만들기 (5km를 쉬지 않고 달리지 못하는 경우) ----------
+// ---------- 5km 연속 달리기 만들기 (5km를 쉬지 않고 달리지 못하는 경우) ----------
 
 export const BUILD_5K_FILE = "runfitlab-5k-nonstop.png";
-export const BUILD_5K_ALT = "5km 무정지 만들기 이미지: 1~2주 달리기 3분 + 걷기 1분 6번, 3~4주 달리기 8분 + 걷기 1분 3~4번, 5주부터 걷지 않고 5km까지, 모두 주 3회";
+export const BUILD_5K_ALT = "5km 연속 달리기 만들기 이미지: 1~2주 달리기 3분 + 걷기 1분 6번, 3~4주 달리기 8분 + 걷기 1분 3~4번, 5주부터 걷지 않고 5km까지, 모두 주 3회";
 
 const BUILD_5K_PHASES = [
   ["1~2주", "달리기 3분 + 걷기 1분", "6번 반복 · 약 24분"],
@@ -216,7 +226,7 @@ export function layoutBuild5k(measure, opts = {}) {
   const family = opts.family ?? FONT_FAMILY;
   const { text, rect, footer, result } = canvasKit(measure, family);
 
-  text("title", [{ text: "5km 무정지 만들기", color: C.white }], { x: L, y: 256, weight: 800, size: 72, minSize: 56, maxWidth: CONTENT_W });
+  text("title", [{ text: "5km 연속 달리기 만들기", color: C.white }], { x: L, y: 256, weight: 800, size: 72, minSize: 56, maxWidth: CONTENT_W });
   text("goalLabel", [{ text: "목표", color: C.sub }], { x: L, y: 380, weight: 700, size: 34, maxWidth: 400 });
   text("goal", [{ text: "5km 쉬지 않고 달리기", color: C.orange }], { x: L, y: 470, weight: 800, size: 72, minSize: 52, maxWidth: CONTENT_W });
 

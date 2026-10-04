@@ -184,7 +184,7 @@ const GATES = {
   },
 };
 
-// 5km를 쉬지 않고 달리지 못하면 결과 화면처럼 "5km 무정지 만들기" 이미지를 보여 준다
+// 5km를 쉬지 않고 달리지 못하면 결과 화면처럼 "5km 연속 달리기 만들기" 이미지를 보여 준다
 async function showBuild5k() {
   go("build5k");
   const img = $("#build5k-img");
@@ -285,7 +285,7 @@ const NOTE_TEXT = {
 const WARNING_TEXT = {
   note_targetTooFast: (p) => ({
     title: "목표 기록은 이번 루틴에 반영하지 않았어요",
-    body: `지금 기록으로 4주 안에 목표(${formatClock(p.target10)})까지 줄이면 부상 위험이 커요. 예상 기록(${formatClock(p.goalTime)}) 기준으로 짰어요. 4주 안에 무리 없는 목표는 ${formatClock(p.targetLimit)}부터예요.`,
+    body: `지금 기록으로 4주 안에 목표(${formatClock(p.target10)})까지 줄이면 부상 위험이 커요. 목표 기록(${formatClock(p.goalTime)}) 기준으로 짰어요. 4주 안에 무리 없는 목표는 ${formatClock(p.targetLimit)}부터예요.`,
   }),
 };
 
