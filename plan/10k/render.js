@@ -198,15 +198,32 @@ export function layout(plan, measure, opts = {}) {
   });
 
   // ⑤ 세션 가이드 (1400~1600)
-  const guideTop = 1446;
-  const guideStep = Math.min(40, 180 / Math.max(plan.guide.length, 1));
-  plan.guide.forEach((g, i) => {
+  // 최소 크기(24px)로도 한 줄에 안 들어가는 가이드는 공백 기준으로 두 줄에 나눈다
+  const guideLines = [];
+  for (const g of plan.guide) {
     const colon = g.text.indexOf(":");
-    const runs = [
+    const width = measure(`400 24px ${family}`, g.text);
+    if (width <= CONTENT_W) {
+      guideLines.push({ id: `guide.${g.key}`, runs: [
+        { text: g.text.slice(0, colon + 1), color: C.white, weight: 700 },
+        { text: g.text.slice(colon + 1), color: C.sub },
+      ] });
+      continue;
+    }
+    // 괄호가 있으면 그 앞에서 나누고, 없으면 가운데에 가까운 공백에서 나눈다
+    const paren = g.text.indexOf("(", colon);
+    let split = paren > colon ? paren : g.text.lastIndexOf(" ", Math.floor(g.text.length / 2));
+    if (split <= colon) split = g.text.indexOf(" ", colon);
+    guideLines.push({ id: `guide.${g.key}`, runs: [
       { text: g.text.slice(0, colon + 1), color: C.white, weight: 700 },
-      { text: g.text.slice(colon + 1), color: C.sub },
-    ];
-    text(`guide.${g.key}`, runs, { x: L, y: guideTop + i * guideStep, weight: 400, size: 26, minSize: 24, maxWidth: CONTENT_W });
+      { text: g.text.slice(colon + 1, split).trimEnd(), color: C.sub },
+    ] });
+    guideLines.push({ id: `guide.${g.key}.2`, runs: [{ text: g.text.slice(split).trimStart(), color: C.sub }] });
+  }
+  const guideTop = 1446;
+  const guideStep = Math.min(40, 180 / Math.max(guideLines.length, 1));
+  guideLines.forEach((line, i) => {
+    text(line.id, line.runs, { x: L, y: guideTop + i * guideStep, weight: 400, size: 26, minSize: 24, maxWidth: CONTENT_W });
   });
 
   // ⑥ 규칙 (1600~1700)

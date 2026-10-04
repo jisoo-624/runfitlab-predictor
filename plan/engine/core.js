@@ -185,7 +185,9 @@ function buildGuide(weeks, runWalk, pace, config) {
       .replace("{interval}", formatPace(pace.interval))
       .replace("{tempo}", formatPace(pace.tempo))
       .replace("{raceLo}", formatPace(pace.goal + 5))
-      .replace("{raceHi}", formatPace(pace.goal + 10));
+      .replace("{raceHi}", formatPace(pace.goal + 10))
+      .replace("{sharpenLo}", formatPace(pace.interval - 30))
+      .replace("{sharpenHi}", formatPace(pace.interval - 10));
     return { key, text };
   });
 }
