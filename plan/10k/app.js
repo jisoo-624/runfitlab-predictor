@@ -284,8 +284,8 @@ const NOTE_TEXT = {
 // 눈에 띄게 따로 보여 줄 경고
 const WARNING_TEXT = {
   note_targetTooFast: (p) => ({
-    title: "목표 기록은 이번 루틴에 반영하지 않았어요",
-    body: `지금 기록으로 4주 안에 목표(${formatClock(p.target10)})까지 줄이면 부상 위험이 커요. 목표 기록(${formatClock(p.goalTime)}) 기준으로 짰어요. 4주 안에 무리 없는 목표는 ${formatClock(p.targetLimit)}부터예요.`,
+    title: `${formatClock(p.target10)}은 4주 안에는 무리예요`,
+    body: `이번 훈련 루틴은 ${formatClock(p.goalTime)} 기준으로 짰어요. 4주 안에 노릴 수 있는 한계는 ${formatClock(p.targetLimit)}까지예요.`,
   }),
 };
 
