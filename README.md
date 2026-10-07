@@ -9,6 +9,7 @@
 - **결과 이미지 저장**: 계산 결과를 PNG 이미지로 다운로드 (Canvas API로 직접 렌더링, 외부 라이브러리 불필요)
 - **반응형 디자인**: 모바일부터 데스크톱까지 대응
 - **개인정보 미저장**: 입력한 기록과 계산 결과는 어디에도 저장되지 않으며, 브라우저 메모리 안에서만 계산됩니다 (localStorage, 쿠키, 서버 전송 없음)
+- **방문자 카운트**: GoatCounter(쿠키 없음)로 방문 수만 세고, footer에 누적 방문 수를 표시 (`counter.js`)
 
 ## 계산 방식
 
@@ -42,6 +43,7 @@ python -m http.server 8080
 index.html   메인 페이지 마크업
 style.css    반응형 스타일
 script.js    Riegel 계산 로직, 페이스 밴드 렌더링, 이미지 저장(Canvas)
+counter.js   방문자 카운트 (GoatCounter)
 ```
 
 ## 10km 완주 4주 루틴 (`/plan/10k/`)
